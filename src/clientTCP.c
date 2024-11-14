@@ -1,6 +1,6 @@
 /**      (C)2000-2021 FEUP
- *       tidy up some includes and parameters
- * */
+ *       tidy up some includes and parameters * 
+*/
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -8,7 +8,6 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 #include <string.h>
 
 #define SERVER_PORT 6000
