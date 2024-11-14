@@ -1,21 +1,11 @@
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
+#include "appliation_layer.h"
+
 #define FTP_PORT 21
 #define MAX_LENGTH_URL 2048
 #define PASSIVE_MODE 0
 #define ACTIVE_MODE 1
 
 
-typedef struct {
-    char* username;
-    char* password;
-    char* host;
-    char* urlPath;
-} FTP_Parameters;
-
-// Implementation parse file transfer protocol url
 int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
     int totalUrlLength = 0;
@@ -27,11 +17,6 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
     url += 6;
     totalUrlLength += 6;
-
-    parameters->username = NULL;
-    parameters->password = NULL;
-    parameters->host = NULL;
-    parameters->urlPath = NULL;
 
     // Username and password logic 
     char* posArr = strchr(url,'@');
@@ -122,7 +107,6 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
     }
 
     // Host logic
-
     char* posSlash = strchr(url, '/');
     if (posSlash != NULL){
 
@@ -154,7 +138,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
     int urlPathLength = strlen(url);
 
     if (urlPathLength == 0){
-        // No URL path, so set it to an empty string
+    
         parameters->urlPath = malloc(1);
         if (parameters->urlPath == NULL){
             printf("ERROR: Failed to allocate memory\n");
@@ -189,7 +173,6 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 int main(int argc, char **argv){
     
     // Parse command line arguments
-
     if (argc != 2){
         printf("ERROR: Incorrect command line arguments.\n");
         printf("Example: download ftp://[<user>:<password>@]<host>/<url-path>\n");
@@ -209,6 +192,8 @@ int main(int argc, char **argv){
         printf("ERROR: Invalid ftp URL.\n");
         exit(-1);
     }
+
+    // FTP server - Connect (PORT)
 
     // FTP server - Login ((USR;PASS))
     
