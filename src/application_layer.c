@@ -22,16 +22,17 @@ char* reverse_dns_handler(const char* ip){
     return strdup(h->h_name);
 }
 
-char* dns_handler(const char * domain){
+char* dns_handler(const char * hostname){
 
     struct in_addr addr;
     struct hostent *h;
 
-    if (inet_aton(domain, &addr) != 0) {
+    if (inet_aton(hostname, &addr) != 0) {
+        perror("Invaild hostname address");
         return NULL;
     }
 
-     if ((h = gethostbyname(domain)) == NULL) {
+     if ((h = gethostbyname(hostname)) == NULL) {
         herror("gethostbyname()");
         exit(-1);
     }
