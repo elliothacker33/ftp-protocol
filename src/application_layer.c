@@ -1,171 +1,346 @@
 #include "appliation_layer.h"
 
-#define FTP_PORT 21
-#define MAX_LENGTH_URL 2048
-#define PASSIVE_MODE 0
-#define ACTIVE_MODE 1
+#define FTP_DEFAULT_PORT 21
+#define FTP_PREFIX_SIZE 6
+#define FTP_MAX_PORT 65535
+#define h_addr h_addr_list[0]
+
+
+
+// ftp://[<user>:<password>@][<host>:<port>/]<url-path>
+
+char* reverse_dns_handler(const char* ip){
+    struct in_addr addr;
+    struct hostent *h;
+ 
+    if (inet_aton(ip, &addr) == 0){
+        perror("Invalid IP address");
+        return NULL;
+    }
+
+    h = gethostbyaddr((const void*) &addr,sizeof(addr),AF_INET);
+    return strdup(h->h_name);
+}
+
+char* dns_handler(const char * domain){
+
+    struct in_addr addr;
+    struct hostent *h;
+
+    if (inet_aton(domain, &addr) != 0) {
+        return NULL;
+    }
+
+     if ((h = gethostbyname(domain)) == NULL) {
+        herror("gethostbyname()");
+        exit(-1);
+    }
+    return inet_ntoa(*((struct in_addr *) h->h_addr));
+}
 
 
 int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
-    int totalUrlLength = 0;
-    // URL start 
-    if (strncmp(url,"ftp://",6) != 0){
-        printf("Invalid url start"); 
+    // Url prefix
+    if (strncmp(url,"ftp://",FTP_PREFIX_SIZE) != 0){
+        perror("ERROR: Invalid url prefix"); 
         return -1;
     }
 
-    url += 6;
-    totalUrlLength += 6;
+    printf("Url using file transfer protocol (FTP)\n");
+    url += FTP_PREFIX_SIZE;
 
     // Username and password logic 
     char* posArr = strchr(url,'@');
     if (posArr != NULL){
+
         char* posColon = strchr(url, ':');
-        if (posColon != NULL && posColon < posArr){
-            
-            // Username
+        if (posColon != NULL && posColon < posArr){  
+
+            // Username and password 
             int usernamesLength = posColon - url;
-            totalUrlLength += usernamesLength + 1;
+            if (usernamesLength == 0){
+                parameters->username[0] = '\0';
+            }
+            else if (usernamesLength > 0 && usernamesLength < URL_FIELD_MAX_LENGTH){
+                strncpy(parameters->username, url, usernamesLength);
+                parameters->username[usernamesLength] = '\0';
 
-            if (totalUrlLength > MAX_LENGTH_URL){
-                printf("URL is too long\n");
+                 for (int i = 0; i < usernamesLength; i++){
+                    if (parameters->username[i] == '/'){
+                        perror("ERROR: Username contains '/'\n");
+                        return -1;
+                    }
+                }
+            }
+            else{
+                perror("ERROR: Username is too long\n");
                 return -1;
             }
 
-            parameters->username = malloc(usernamesLength + 1);
-            if (parameters->username == NULL){
-                printf("ERROR: Failed to allocate memory\n");
-                return -1;
-            }
-
-            strncpy(parameters->username, url, usernamesLength);
-            parameters->username[usernamesLength] = '\0';
-
-            // Password
             int passwordLength = posArr - posColon - 1;
-            totalUrlLength += passwordLength + 1;
+            if (passwordLength == 0){
+                parameters->password[0] = '\0';
+            }
+            else if (passwordLength > 0 && passwordLength < URL_FIELD_MAX_LENGTH){
+                strncpy(parameters->password,posColon + 1,passwordLength);
+                parameters->password[passwordLength] = '\0';
 
-            if (totalUrlLength > MAX_LENGTH_URL){
-                printf("URL is too long\n");
+                for (int i = 0; i < passwordLength; i++){
+                    if (parameters->password[i] == ':' || parameters->password[i] == '/'){
+                        perror("ERROR: Password contains ':' or '/'\n");
+                        return -1;
+                    }
+                }
+            }
+            else{
+                perror("ERROR: Password is too long\n");
                 return -1;
             }
-
-            parameters->password = malloc(passwordLength + 1);
-            if (parameters->password == NULL){
-                printf("ERROR: Failed to allocate memory\n");
-                return -1;
-            }
-
-            strncpy(parameters->password,posColon + 1,passwordLength);
-            parameters->password[passwordLength] = '\0';
-            
         }
-        else{
-            // Only has username, but no password
-            int usernameLength = posArr - url;
-            totalUrlLength += usernameLength + 1;
+        else if (posColon == NULL){
+            if (url < posArr){         
+                // Only has username, but no password 
+                int usernameLength = posArr - url;
+                if (usernameLength > URL_FIELD_MAX_LENGTH){
+                    perror("ERROR: Username is too long\n");
+                    return -1;
+                }
 
-            if (totalUrlLength > MAX_LENGTH_URL){
-                printf("URL is too long\n");
-                return -1;
+                strncpy(parameters->username, url, usernameLength);
+                parameters->username[usernameLength] = '\0';
+
+                parameters->password[0] = '\0';
             }
-
-            parameters->username = malloc(usernameLength + 1);
-            if (parameters->username == NULL){
-                printf("ERROR: Failed to allocate memory\n");
-                return -1;
+            else if (url == posArr){
+                // Anonymous
+               parameters->username[0] = '\0';
+               parameters->password[0] = '\0';
             }
-            strncpy(parameters->username, url, usernameLength);
-            parameters->username[usernameLength] = '\0';
-
-            parameters->password = malloc(1);
-            if (parameters->password == NULL){
-                printf("ERROR: Failed to allocate memory\n");
-                return -1;
-            }
-            parameters->password[0] = '\0';
-
         }
         url = posArr + 1;
     }
     else{
-     
-        parameters->username = malloc(1);
-        if (parameters->username == NULL){
-            printf("ERROR: Failed to allocate memory\n");
-            return -1;
-        }
         parameters->username[0] = '\0';
-
-        parameters->password = malloc(1);
-        if (parameters->password == NULL){
-            printf("ERROR: Failed to allocate memory\n");
-            return -1;
-        }
         parameters->password[0] = '\0';
     }
 
-    // Host logic
+
+    // Host and Port logic 
     char* posSlash = strchr(url, '/');
     if (posSlash != NULL){
+        char* posColon = strchr(url,':');
+        if (posColon != NULL && posColon < posSlash){
+            // Host and port
+            int hostNameLength = posColon - url;
+            if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
+                perror("ERROR: Host name is too long\n");
+                return -1;
+            }
 
-        int hostLength = posSlash - url;
-        totalUrlLength += hostLength + 1;
+            strncpy(parameters->hostname, url, hostNameLength);
+            parameters->hostname[hostNameLength] = '\0';
 
-        if (totalUrlLength > MAX_LENGTH_URL){
-            printf("URL is too long\n");
-            return -1;
+            char* dnsResult = dns_handler(parameters->hostname);
+            if (dnsResult != NULL) {
+                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
+                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+            } 
+            else {
+                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
+                if (reverseDnsResult != NULL) {
+                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
+                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
+                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
+                } else {
+                    perror("ERROR: Invalid host name or IP\n");
+                    return -1;
+                }
+            }
+            
+            // Check if port is valid
+            char* posColonAux = posColon;
+            posColonAux++;
+            if (posColonAux == posSlash){
+                perror("ERROR: Invalid port format\n");
+                return -1;
+            }
+
+            while (posColonAux != posSlash){
+                if (!isdigit(*posColonAux)){
+                    perror("ERROR: Invalid port format\n");
+                    return -1;
+                }
+                posColonAux++;
+            }
+            
+            // First digit can't be zero
+            if (*(posColon + 1) == '0'){
+                perror("ERROR: Invalid port format\n");
+                return -1;
+            }
+
+            parameters->port = atoi(posColon + 1);
+            if (parameters->port <= 0 || parameters->port > FTP_MAX_PORT){
+                perror("ERROR: Invalid port number\n");
+                return -1;
+            } 
         }
+        else{
+            // Only has host, and default ftp port
+            int hostNameLength = posSlash - url;
+            if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
+                perror("ERROR: Host name is too long\n");
+                return -1;
+            }
 
-        parameters->host = malloc(hostLength + 1);
-        if (parameters->host == NULL){
-            printf("ERROR: Failed to allocate memory\n");
-            return -1;
+            strncpy(parameters->hostname, url, hostNameLength);
+            parameters->hostname[hostNameLength] = '\0';
+
+            char* dnsResult = dns_handler(parameters->hostname);
+            if (dnsResult != NULL) {
+                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
+                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+            } 
+            else {
+                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
+                if (reverseDnsResult != NULL) {
+                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
+                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
+                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
+                } else {
+                    perror("ERROR: Invalid host name or IP\n");
+                    return -1;
+                }
+            }
+
+            parameters->port = FTP_DEFAULT_PORT;
         }
-        strncpy(parameters->host, url, hostLength);
-        parameters->host[hostLength] = '\0';
-
         url = posSlash + 1;
-
     }
     else{
-        printf("ERROR: Invalid ftp URL. Host is required\n");
-        return -1;
-    }
+        // No slash case
+        char* posColon = strchr(url,':');
+        if (posColon != NULL){
+            // Host and port
+            int hostNameLength = posColon - url;
+            if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
+                perror("ERROR: Host name is too long\n");
+                return -1;
+            }
 
-    // URL path logic
-    int urlPathLength = strlen(url);
+            strncpy(parameters->hostname, url, hostNameLength);
+            parameters->hostname[hostNameLength] = '\0';
 
-    if (urlPathLength == 0){
-    
-        parameters->urlPath = malloc(1);
-        if (parameters->urlPath == NULL){
-            printf("ERROR: Failed to allocate memory\n");
-            return -1;
+            char* dnsResult = dns_handler(parameters->hostname);
+            if (dnsResult != NULL) {
+                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
+                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+            } 
+            else {
+                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
+                if (reverseDnsResult != NULL) {
+                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
+                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
+                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
+                } else {
+                    perror("ERROR: Invalid host name or IP\n");
+                    return -1;
+                }
+            }
+
+            char* posColonAux = posColon;
+            posColonAux++;
+            if ((*posColonAux) == '\0'){
+                perror("ERROR: Invalid port format\n");
+                return -1;
+            }
+
+            while ((*posColonAux) != '\0'){
+                if (!isdigit(*posColonAux)){
+                    perror("ERROR: Invalid port format\n");
+                    return -1;
+                }
+                posColonAux++;
+            }
+            
+            // First digit can't be zero
+            if (*(posColon + 1) == '0'){
+                perror("ERROR: Invalid port format\n");
+                return -1;
+            }
+
+            parameters->port = atoi(posColon + 1);
+            if (parameters->port <= 0 || parameters->port > FTP_MAX_PORT){
+                perror("ERROR: Invalid port number\n");
+                return -1;
+            }
         }
-        parameters->urlPath[0] = '\0';
-        return 0;
+        else{
+            // Only has host, and default ftp port
+            int hostNameLength = strlen(url);
+            if (hostNameLength > URL_FIELD_MAX_LENGTH){
+                perror("ERROR: Host name is too long\n");
+                return -1;
+            }
+
+            strncpy(parameters->hostname, url, hostNameLength);
+            parameters->hostname[hostNameLength] = '\0';
+
+            char* dnsResult = dns_handler(parameters->hostname);
+            if (dnsResult != NULL) {
+                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
+                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+            } 
+            else {
+                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
+                if (reverseDnsResult != NULL) {
+                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
+                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
+                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
+                } else {
+                    perror("ERROR: Invalid host name or IP\n");
+                    return -1;
+                }
+            }
+
+            parameters->port = FTP_DEFAULT_PORT;
+        }
     }
 
-    totalUrlLength += urlPathLength;
-
-    if(totalUrlLength > MAX_LENGTH_URL){
-        printf("URL is too long\n");
-        return -1;
+    // !!All done until here.  Make host and port simpler.
+    // Path format depends on the file system
+    if (posSlash != NULL){
+        url = posSlash + 1;
+        int urlPathLength = strlen(url);
+        if (urlPathLength == 0){
+            parameters->path[0] = '\0';
+        }
+        else if (urlPathLength > 0 && urlPathLength < URL_MAX_PATH_LENGTH){
+            strncpy(parameters->path, url, urlPathLength);
+            parameters->path[urlPathLength] = '\0';
+        }
+        else{
+            perror("ERROR: URL path is too long\n");
+            return -1;
+        }   
     }
-    parameters->urlPath = malloc(urlPathLength + 1);
-    if (parameters->urlPath == NULL){
-        printf("ERROR: Failed to allocate memory\n");
-        return -1;
+    else{
+        parameters->path[0] = '/';
     }
-    strcpy(parameters->urlPath, url);
 
-    printf("URL: %s\n", parameters->urlPath);
+
+    printf("Path: %s\n", parameters->path);
     printf("Username: %s\n", parameters->username);
     printf("Password: %s\n", parameters->password);
-    printf("Host: %s\n", parameters->host);
-    printf("chars: %d\n", totalUrlLength);
+    printf("Domain: %s\n", parameters->hostname);
+    printf("IP: %s\n", parameters->ip);
+    printf("Port: %d\n", parameters->port);
+
     return 0;
 
 }
@@ -209,22 +384,6 @@ int main(int argc, char **argv){
 
     // FTP server - Logout (QUIT)
 
-    // Free allocated memory
-    if (ftpParams.username != NULL){
-        free(ftpParams.username);
-    }
-
-    if (ftpParams.password != NULL){
-        free(ftpParams.password);
-    }
-
-    if (ftpParams.host != NULL){
-        free(ftpParams.host);
-    }
-
-    if (ftpParams.urlPath != NULL){
-        free(ftpParams.urlPath);
-    }
 
     return 0;
 }

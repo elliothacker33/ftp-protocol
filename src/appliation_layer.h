@@ -2,12 +2,23 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <netdb.h>
+#include <ctype.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#define URL_FIELD_MAX_LENGTH 255
+#define URL_MAX_PATH_LENGTH  1024
 
 typedef struct {
-    char* username;
-    char* password;
-    char* host;
-    char* urlPath;
+    char username[URL_FIELD_MAX_LENGTH + 1];
+    char password[URL_FIELD_MAX_LENGTH + 1];
+    char hostname[URL_FIELD_MAX_LENGTH + 1];
+    char path[URL_MAX_PATH_LENGTH + 1];
+    char ip[URL_FIELD_MAX_LENGTH + 1]; // IPV4
+    int port;
 } FTP_Parameters;
 
 
