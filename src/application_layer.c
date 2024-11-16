@@ -3,6 +3,8 @@
 #define FTP_DEFAULT_PORT 21
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
+#define USER_ANONYMOUS "anonymous"
+#define PASS_ANONYMOUS "anonymous"
 #define h_addr h_addr_list[0]
 
 
@@ -14,7 +16,6 @@ char* reverse_dns_handler(const char* ip){
     struct hostent *h;
  
     if (inet_aton(ip, &addr) == 0){
-        perror("Invalid IP address");
         return NULL;
     }
 
@@ -28,7 +29,6 @@ char* dns_handler(const char * hostname){
     struct hostent *h;
 
     if (inet_aton(hostname, &addr) != 0) {
-        perror("Invaild hostname address");
         return NULL;
     }
 
@@ -39,6 +39,27 @@ char* dns_handler(const char * hostname){
     return inet_ntoa(*((struct in_addr *) h->h_addr));
 }
 
+int ipAndHostChecker(FTP_Parameters* parameters){
+    char* dnsResult = dns_handler(parameters->hostname);
+    if (dnsResult != NULL) {
+        strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
+        parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+    } 
+    else {
+        char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
+        if (reverseDnsResult != NULL) {
+            strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
+            parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
+            strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+            parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
+        } else {
+            fprintf(stderr,"ERROR: Invalid host name or IP\n");
+            return -1;
+        }
+    }
+    return 0;
+}
+
 
 int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
@@ -47,8 +68,6 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
         fprintf(stderr,"ERROR: Invalid url prefix"); 
         return -1;
     }
-
-    printf("Url using file transfer protocol (FTP)\n");
     url += FTP_PREFIX_SIZE;
 
     // Username and password logic 
@@ -57,7 +76,8 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
         char* posColon = strchr(url, ':');
         if (posColon != NULL && posColon < posArr){     
-            // Username and password 
+            // Username and password  - Example: ftp://username:password@ftp.up.pt......
+            // Username
             int usernameLength = posColon - url;
             if (usernameLength == 0){
                 parameters->username[0] = '\0';
@@ -65,12 +85,10 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             else if (usernameLength > 0 && usernameLength < URL_FIELD_MAX_LENGTH){
                 strncpy(parameters->username, url, usernameLength);
                 parameters->username[usernameLength] = '\0';
-
-                 for (int i = 0; i < usernameLength; i++){
-                    if (parameters->username[i] == '/'){
-                        fprintf(stderr,"ERROR: Username contains '/'\n");
-                        return -1;
-                    }
+                
+                if (strchr(parameters->username, '/')) {
+                    fprintf(stderr, "ERROR: Username contains '/'\n");
+                    return -1;
                 }
             }
             else{
@@ -78,6 +96,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                 return -1;
             }
 
+            // Password
             int passwordLength = posArr - posColon - 1;
             if (passwordLength == 0){
                 parameters->password[0] = '\0';
@@ -86,11 +105,9 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                 strncpy(parameters->password,posColon + 1,passwordLength);
                 parameters->password[passwordLength] = '\0';
 
-                for (int i = 0; i < passwordLength; i++){
-                    if (parameters->password[i] == ':' || parameters->password[i] == '/'){
-                        fprintf(stderr,"ERROR: Password contains ':' or '/'\n");
-                        return -1;
-                    }
+                if (strchr(parameters->password, '/') || strchr(parameters->password, ':')) {
+                    fprintf(stderr, "ERROR: Username contains ':' or '/'\n");
+                    return -1;
                 }
             }
             else{
@@ -98,40 +115,40 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                 return -1;
             }
         }
-        else if (posColon == NULL || (posColon != NULL && posColon > posArr)){
-            if (url < posArr){       
-                // Only has username, but no password 
-                int usernameLength = posArr - url;
-          
-                if (usernameLength > 0 && usernameLength < URL_FIELD_MAX_LENGTH){
-                    strncpy(parameters->username, url, usernameLength);
-                    parameters->username[usernameLength] = '\0';
+        else if (posColon == NULL || (posColon != NULL && posColon > posArr)){  
+            // Only has username, but no password - Example: ftp://username@ftp.up.pt......
+            // Username
+            int usernameLength = posArr - url;
+            if (usernameLength > URL_FIELD_MAX_LENGTH) {
+                fprintf(stderr, "ERROR: Username is too long\n");
+                return -1;
+            }
 
-                        for (int i = 0; i < usernameLength; i++){
-                        if (parameters->username[i] == '/'){
-                            fprintf(stderr,"ERROR: Username contains '/'\n");
-                            return -1;
-                        }
-                    }
-                }
-                else{
-                    fprintf(stderr,"ERROR: Username is too long\n");
+            if (usernameLength > 0) {
+                strncpy(parameters->username, url, usernameLength);
+                parameters->username[usernameLength] = '\0';
+
+                if (strchr(parameters->username, '/')) {
+                    fprintf(stderr, "ERROR: Username contains '/'\n");
                     return -1;
                 }
-
-                parameters->password[0] = '\0';
+            } else {
+                parameters->username[0] = '\0'; // Empty username
             }
-            else if (url == posArr){
-                // Anonymous
-               parameters->username[0] = '\0';
-               parameters->password[0] = '\0';
-            }
+            // Password
+            parameters->password[0] = '\0'; // Password not given, assume empty
         }
         url = posArr + 1;
     }
     else{
-        parameters->username[0] = '\0';
-        parameters->password[0] = '\0';
+        // Anonymous account - Example: ftp://ftp.up.pt......
+        int anonymousUserLength = sizeof(USER_ANONYMOUS);
+        int anonymousPasswordLength = sizeof(PASS_ANONYMOUS);
+
+        strncpy(parameters->username, USER_ANONYMOUS, anonymousUserLength);
+        parameters->username[anonymousUserLength] = '\0';
+        strncpy(parameters->password, PASS_ANONYMOUS, anonymousPasswordLength);
+        parameters->password[anonymousPasswordLength] = '\0';
     }
 
 
@@ -140,6 +157,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
     if (posSlash != NULL){
         char* posColon = strchr(url,':');
         if (posColon != NULL && posColon < posSlash){
+            // Hostname and port - Example: ftp://hostname:port/....
             // Host and port
             int hostNameLength = posColon - url;
             if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
@@ -150,22 +168,9 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
 
-            char* dnsResult = dns_handler(parameters->hostname);
-            if (dnsResult != NULL) {
-                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
-                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
-            } 
-            else {
-                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
-                if (reverseDnsResult != NULL) {
-                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
-                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
-                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
-                } else {
-                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
-                    return -1;
-                }
+            // Hostname or IP validity check
+            if (ipAndHostChecker(parameters) == -1){
+                return -1;
             }
             
             // Check if port is valid
@@ -207,22 +212,9 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
 
-            char* dnsResult = dns_handler(parameters->hostname);
-            if (dnsResult != NULL) {
-                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
-                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
-            } 
-            else {
-                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
-                if (reverseDnsResult != NULL) {
-                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
-                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
-                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
-                } else {
-                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
-                    return -1;
-                }
+             // Hostname or IP validity check
+            if (ipAndHostChecker(parameters) == -1){
+                return -1;
             }
 
             parameters->port = FTP_DEFAULT_PORT;
@@ -233,6 +225,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
         // No slash case
         char* posColon = strchr(url,':');
         if (posColon != NULL){
+
             // Host and port
             int hostNameLength = posColon - url;
             if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
@@ -243,22 +236,9 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
 
-            char* dnsResult = dns_handler(parameters->hostname);
-            if (dnsResult != NULL) {
-                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
-                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
-            } 
-            else {
-                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
-                if (reverseDnsResult != NULL) {
-                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
-                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
-                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
-                } else {
-                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
-                    return -1;
-                }
+             // Hostname or IP validity check
+            if (ipAndHostChecker(parameters) == -1){
+                return -1;
             }
 
             char* posColonAux = posColon;
@@ -299,22 +279,9 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
 
-            char* dnsResult = dns_handler(parameters->hostname);
-            if (dnsResult != NULL) {
-                strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
-                parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
-            } 
-            else {
-                char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
-                if (reverseDnsResult != NULL) {
-                    strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
-                    parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
-                    strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-                    parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
-                } else {
-                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
-                    return -1;
-                }
+             // Hostname or IP validity check
+            if (ipAndHostChecker(parameters) == -1){
+                return -1;
             }
 
             parameters->port = FTP_DEFAULT_PORT;
@@ -338,7 +305,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
         }   
     }
     else{
-        parameters->path[0] = '/';
+        parameters->path[0] = '\0'; // root path
     }
 
 
