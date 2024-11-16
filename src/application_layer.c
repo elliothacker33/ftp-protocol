@@ -56,18 +56,17 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
     if (posArr != NULL){
 
         char* posColon = strchr(url, ':');
-        if (posColon != NULL && posColon < posArr){  
-
+        if (posColon != NULL && posColon < posArr){     
             // Username and password 
-            int usernamesLength = posColon - url;
-            if (usernamesLength == 0){
+            int usernameLength = posColon - url;
+            if (usernameLength == 0){
                 parameters->username[0] = '\0';
             }
-            else if (usernamesLength > 0 && usernamesLength < URL_FIELD_MAX_LENGTH){
-                strncpy(parameters->username, url, usernamesLength);
-                parameters->username[usernamesLength] = '\0';
+            else if (usernameLength > 0 && usernameLength < URL_FIELD_MAX_LENGTH){
+                strncpy(parameters->username, url, usernameLength);
+                parameters->username[usernameLength] = '\0';
 
-                 for (int i = 0; i < usernamesLength; i++){
+                 for (int i = 0; i < usernameLength; i++){
                     if (parameters->username[i] == '/'){
                         fprintf(stderr,"ERROR: Username contains '/'\n");
                         return -1;
@@ -99,17 +98,26 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                 return -1;
             }
         }
-        else if (posColon == NULL){
-            if (url < posArr){         
+        else if (posColon == NULL || (posColon != NULL && posColon > posArr)){
+            if (url < posArr){       
                 // Only has username, but no password 
                 int usernameLength = posArr - url;
-                if (usernameLength > URL_FIELD_MAX_LENGTH){
+          
+                if (usernameLength > 0 && usernameLength < URL_FIELD_MAX_LENGTH){
+                    strncpy(parameters->username, url, usernameLength);
+                    parameters->username[usernameLength] = '\0';
+
+                        for (int i = 0; i < usernameLength; i++){
+                        if (parameters->username[i] == '/'){
+                            fprintf(stderr,"ERROR: Username contains '/'\n");
+                            return -1;
+                        }
+                    }
+                }
+                else{
                     fprintf(stderr,"ERROR: Username is too long\n");
                     return -1;
                 }
-
-                strncpy(parameters->username, url, usernameLength);
-                parameters->username[usernameLength] = '\0';
 
                 parameters->password[0] = '\0';
             }
@@ -188,7 +196,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                 return -1;
             } 
         }
-        else{
+        else if (posColon == NULL || (posColon != NULL && posColon > posSlash)){
             // Only has host, and default ftp port
             int hostNameLength = posSlash - url;
             if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
@@ -313,7 +321,6 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
         }
     }
 
-    // !!All done until here.  Make host and port simpler.
     // Path format depends on the file system
     if (posSlash != NULL){
         url = posSlash + 1;
