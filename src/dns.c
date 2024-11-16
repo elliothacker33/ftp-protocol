@@ -3,7 +3,7 @@
 #define h_addr h_addr_list[0]
 #define IPV4   AF_INET
 
-char* reverse_dns_handler(const char* ip){
+char* reverseDnsLookup(const char* ip){
     struct in_addr addr;
     struct hostent* h;
  
@@ -15,7 +15,7 @@ char* reverse_dns_handler(const char* ip){
     return strdup(h->h_name);
 }
 
-char* dns_handler(const char * hostname){
+char* dnsLookup(const char * hostname){
 
     struct in_addr addr;
     struct hostent* h;

@@ -11,9 +11,8 @@ int main(int argc, char **argv){
 
     // Parse other arguments
     FTP_Parameters ftpParams;
-    memset(&ftpParams, 0, sizeof(FTP_Parameters));
-
-    if (parse_ftp_url(argv[1], &ftpParams) != 0){
+    
+    if (ftpUrlParser(argv[1], &ftpParams) != 0){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
         exit(-1);
     }

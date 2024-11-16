@@ -6,19 +6,19 @@
 #define USER_ANONYMOUS "anonymous"
 #define PASS_ANONYMOUS "anonymous"
 
-int ipAndHostChecker(FTP_Parameters* parameters){
-    char* dnsResult = dns_handler(parameters->hostname);
+int ipAndHostChecker(char* hostname, char* ip){
+    char* dnsResult = dnsLookup(hostname);
     if (dnsResult != NULL) {
-        strncpy(parameters->ip, dnsResult, URL_FIELD_MAX_LENGTH);
-        parameters->ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+        strncpy(ip, dnsResult, URL_FIELD_MAX_LENGTH);
+        ip[URL_FIELD_MAX_LENGTH] = '\0'; 
     } 
     else {
-        char* reverseDnsResult = reverse_dns_handler(parameters->hostname);
+        char* reverseDnsResult = reverseDnsLookup(hostname);
         if (reverseDnsResult != NULL) {
-            strncpy(parameters->ip, parameters->hostname, URL_FIELD_MAX_LENGTH);
-            parameters->ip[URL_FIELD_MAX_LENGTH] = '\0';
-            strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-            parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
+            strncpy(ip, hostname, URL_FIELD_MAX_LENGTH);
+            ip[URL_FIELD_MAX_LENGTH] = '\0';
+            strncpy(hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+            hostname[URL_FIELD_MAX_LENGTH] = '\0';
         } else {
             fprintf(stderr,"ERROR: Invalid host name or IP\n");
             return -1;
@@ -27,7 +27,7 @@ int ipAndHostChecker(FTP_Parameters* parameters){
     return 0;
 }
 
-int parse_ftp_url(const char* url, FTP_Parameters* parameters){
+int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
     // Url prefix
     if (strncmp(url,"ftp://",FTP_PREFIX_SIZE) != 0){
@@ -135,7 +135,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             parameters->hostname[hostNameLength] = '\0';
 
             // Hostname or IP validity check
-            if (ipAndHostChecker(parameters) == -1){
+            if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
             }
             
@@ -179,13 +179,12 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             parameters->hostname[hostNameLength] = '\0';
 
              // Hostname or IP validity check
-            if (ipAndHostChecker(parameters) == -1){
+            if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
             }
 
             parameters->port = FTP_DEFAULT_PORT;
         }
-        url = posSlash + 1;
     }
     else{
         // No slash case
@@ -203,7 +202,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             parameters->hostname[hostNameLength] = '\0';
 
              // Hostname or IP validity check
-            if (ipAndHostChecker(parameters) == -1){
+            if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
             }
 
@@ -246,7 +245,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             parameters->hostname[hostNameLength] = '\0';
 
              // Hostname or IP validity check
-            if (ipAndHostChecker(parameters) == -1){
+            if (ipAndHostChecker(parameters->ip, parameters->hostname) == -1){
                 return -1;
             }
 
