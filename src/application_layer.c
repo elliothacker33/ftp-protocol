@@ -44,7 +44,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
     // Url prefix
     if (strncmp(url,"ftp://",FTP_PREFIX_SIZE) != 0){
-        perror("ERROR: Invalid url prefix"); 
+        fprintf(stderr,"ERROR: Invalid url prefix"); 
         return -1;
     }
 
@@ -69,13 +69,13 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
                  for (int i = 0; i < usernamesLength; i++){
                     if (parameters->username[i] == '/'){
-                        perror("ERROR: Username contains '/'\n");
+                        fprintf(stderr,"ERROR: Username contains '/'\n");
                         return -1;
                     }
                 }
             }
             else{
-                perror("ERROR: Username is too long\n");
+                fprintf(stderr,"ERROR: Username is too long\n");
                 return -1;
             }
 
@@ -89,13 +89,13 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
                 for (int i = 0; i < passwordLength; i++){
                     if (parameters->password[i] == ':' || parameters->password[i] == '/'){
-                        perror("ERROR: Password contains ':' or '/'\n");
+                        fprintf(stderr,"ERROR: Password contains ':' or '/'\n");
                         return -1;
                     }
                 }
             }
             else{
-                perror("ERROR: Password is too long\n");
+                fprintf(stderr,"ERROR: Password is too long\n");
                 return -1;
             }
         }
@@ -104,7 +104,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                 // Only has username, but no password 
                 int usernameLength = posArr - url;
                 if (usernameLength > URL_FIELD_MAX_LENGTH){
-                    perror("ERROR: Username is too long\n");
+                    fprintf(stderr,"ERROR: Username is too long\n");
                     return -1;
                 }
 
@@ -135,7 +135,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             // Host and port
             int hostNameLength = posColon - url;
             if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
-                perror("ERROR: Host name is too long\n");
+                fprintf(stderr,"ERROR: Host name is too long\n");
                 return -1;
             }
 
@@ -155,7 +155,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                     strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
                     parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
                 } else {
-                    perror("ERROR: Invalid host name or IP\n");
+                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
                     return -1;
                 }
             }
@@ -164,13 +164,13 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             char* posColonAux = posColon;
             posColonAux++;
             if (posColonAux == posSlash){
-                perror("ERROR: Invalid port format\n");
+                fprintf(stderr,"ERROR: Invalid port format\n");
                 return -1;
             }
 
             while (posColonAux != posSlash){
                 if (!isdigit(*posColonAux)){
-                    perror("ERROR: Invalid port format\n");
+                    fprintf(stderr,"ERROR: Invalid port format\n");
                     return -1;
                 }
                 posColonAux++;
@@ -178,13 +178,13 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             
             // First digit can't be zero
             if (*(posColon + 1) == '0'){
-                perror("ERROR: Invalid port format\n");
+                fprintf(stderr,"ERROR: Invalid port format\n");
                 return -1;
             }
 
             parameters->port = atoi(posColon + 1);
             if (parameters->port <= 0 || parameters->port > FTP_MAX_PORT){
-                perror("ERROR: Invalid port number\n");
+                fprintf(stderr,"ERROR: Invalid port number\n");
                 return -1;
             } 
         }
@@ -192,7 +192,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             // Only has host, and default ftp port
             int hostNameLength = posSlash - url;
             if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
-                perror("ERROR: Host name is too long\n");
+                fprintf(stderr,"ERROR: Host name is too long\n");
                 return -1;
             }
 
@@ -212,7 +212,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                     strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
                     parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
                 } else {
-                    perror("ERROR: Invalid host name or IP\n");
+                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
                     return -1;
                 }
             }
@@ -228,7 +228,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             // Host and port
             int hostNameLength = posColon - url;
             if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
-                perror("ERROR: Host name is too long\n");
+                fprintf(stderr,"ERROR: Host name is too long\n");
                 return -1;
             }
 
@@ -248,7 +248,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                     strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
                     parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
                 } else {
-                    perror("ERROR: Invalid host name or IP\n");
+                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
                     return -1;
                 }
             }
@@ -256,13 +256,13 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             char* posColonAux = posColon;
             posColonAux++;
             if ((*posColonAux) == '\0'){
-                perror("ERROR: Invalid port format\n");
+                fprintf(stderr,"ERROR: Invalid port format\n");
                 return -1;
             }
 
             while ((*posColonAux) != '\0'){
                 if (!isdigit(*posColonAux)){
-                    perror("ERROR: Invalid port format\n");
+                    fprintf(stderr,"ERROR: Invalid port format\n");
                     return -1;
                 }
                 posColonAux++;
@@ -270,13 +270,13 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             
             // First digit can't be zero
             if (*(posColon + 1) == '0'){
-                perror("ERROR: Invalid port format\n");
+                fprintf(stderr,"ERROR: Invalid port format\n");
                 return -1;
             }
 
             parameters->port = atoi(posColon + 1);
             if (parameters->port <= 0 || parameters->port > FTP_MAX_PORT){
-                perror("ERROR: Invalid port number\n");
+                fprintf(stderr,"ERROR: Invalid port number\n");
                 return -1;
             }
         }
@@ -284,7 +284,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             // Only has host, and default ftp port
             int hostNameLength = strlen(url);
             if (hostNameLength > URL_FIELD_MAX_LENGTH){
-                perror("ERROR: Host name is too long\n");
+                fprintf(stderr,"ERROR: Host name is too long\n");
                 return -1;
             }
 
@@ -304,7 +304,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
                     strncpy(parameters->hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
                     parameters->hostname[URL_FIELD_MAX_LENGTH] = '\0';
                 } else {
-                    perror("ERROR: Invalid host name or IP\n");
+                    fprintf(stderr,"ERROR: Invalid host name or IP\n");
                     return -1;
                 }
             }
@@ -326,7 +326,7 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
             parameters->path[urlPathLength] = '\0';
         }
         else{
-            perror("ERROR: URL path is too long\n");
+            fprintf(stderr,"ERROR: URL path is too long\n");
             return -1;
         }   
     }
@@ -350,13 +350,13 @@ int main(int argc, char **argv){
     
     // Parse command line arguments
     if (argc != 2){
-        printf("ERROR: Incorrect command line arguments.\n");
+        fprintf(stderr,"ERROR: Incorrect command line arguments.\n");
         printf("Example: download ftp://[<user>:<password>@]<host>/<url-path>\n");
         exit(-1);
     }
 
     if (strcmp(argv[0], "./download") != 0){
-        printf("ERROR: Invalid command. Use 'download' as the first argument.\n");
+        fprintf(stderr,"ERROR: Invalid command. Use 'download' as the first argument.\n");
         exit(-1);
     }
 
@@ -365,7 +365,7 @@ int main(int argc, char **argv){
     memset(&ftpParams, 0, sizeof(FTP_Parameters));
 
     if (parse_ftp_url(argv[1], &ftpParams) != 0){
-        printf("ERROR: Invalid ftp URL.\n");
+        fprintf(stderr,"ERROR: Invalid ftp URL.\n");
         exit(-1);
     }
 
