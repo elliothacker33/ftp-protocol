@@ -1,13 +1,13 @@
+
+#ifndef _PARSER_H_
+#define _PARSER_H_
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-#include <netdb.h>
 #include <ctype.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include "dns.h"
 
 #define URL_FIELD_MAX_LENGTH 255
 #define URL_MAX_PATH_LENGTH  1024
@@ -21,7 +21,6 @@ typedef struct {
     int port;
 } FTP_Parameters;
 
-
 /**
  * @brief This function is used to parse the ftp url.
  * @param url - pointer to the url.
@@ -29,7 +28,4 @@ typedef struct {
  */
 int parse_ftp_url(const char* url, FTP_Parameters* parameters);
 
-/**
- * @brief This function handles the logic of a download request to a ftp server.
- */
-int main(int argc, char **argv);
+#endif // _PARSER_H_

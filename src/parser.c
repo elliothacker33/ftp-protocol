@@ -1,43 +1,10 @@
-#include "appliation_layer.h"
+#include "parser.h"
 
 #define FTP_DEFAULT_PORT 21
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
 #define USER_ANONYMOUS "anonymous"
 #define PASS_ANONYMOUS "anonymous"
-#define h_addr h_addr_list[0]
-
-
-
-// ftp://[<user>:<password>@][<host>:<port>/]<url-path>
-
-char* reverse_dns_handler(const char* ip){
-    struct in_addr addr;
-    struct hostent *h;
- 
-    if (inet_aton(ip, &addr) == 0){
-        return NULL;
-    }
-
-    h = gethostbyaddr((const void*) &addr,sizeof(addr),AF_INET);
-    return strdup(h->h_name);
-}
-
-char* dns_handler(const char * hostname){
-
-    struct in_addr addr;
-    struct hostent *h;
-
-    if (inet_aton(hostname, &addr) != 0) {
-        return NULL;
-    }
-
-     if ((h = gethostbyname(hostname)) == NULL) {
-        herror("gethostbyname()");
-        exit(-1);
-    }
-    return inet_ntoa(*((struct in_addr *) h->h_addr));
-}
 
 int ipAndHostChecker(FTP_Parameters* parameters){
     char* dnsResult = dns_handler(parameters->hostname);
@@ -59,7 +26,6 @@ int ipAndHostChecker(FTP_Parameters* parameters){
     }
     return 0;
 }
-
 
 int parse_ftp_url(const char* url, FTP_Parameters* parameters){
 
@@ -315,50 +281,6 @@ int parse_ftp_url(const char* url, FTP_Parameters* parameters){
     printf("Domain: %s\n", parameters->hostname);
     printf("IP: %s\n", parameters->ip);
     printf("Port: %d\n", parameters->port);
-
-    return 0;
-
-}
-
-int main(int argc, char **argv){
-    
-    // Parse command line arguments
-    if (argc != 2){
-        fprintf(stderr,"ERROR: Incorrect command line arguments.\n");
-        printf("Example: download ftp://[<user>:<password>@]<host>/<url-path>\n");
-        exit(-1);
-    }
-
-    if (strcmp(argv[0], "./download") != 0){
-        fprintf(stderr,"ERROR: Invalid command. Use 'download' as the first argument.\n");
-        exit(-1);
-    }
-
-    // Parse other arguments
-    FTP_Parameters ftpParams;
-    memset(&ftpParams, 0, sizeof(FTP_Parameters));
-
-    if (parse_ftp_url(argv[1], &ftpParams) != 0){
-        fprintf(stderr,"ERROR: Invalid ftp URL.\n");
-        exit(-1);
-    }
-
-    // FTP server - Connect (PORT)
-
-    // FTP server - Login ((USR;PASS))
-    
-    // FTP server - Find file (CWD)
-
-    // FTP server - Change to binary format (TYPE)
-
-    // FTP server - Get file size (SIZE)
-
-    // FTP server - Assert mode (MODE) 
-
-    // FTP server - Download file (RETR)
-
-    // FTP server - Logout (QUIT)
-
 
     return 0;
 }
