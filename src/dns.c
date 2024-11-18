@@ -4,6 +4,9 @@
 #define IPV4   AF_INET
 
 char* reverseDnsLookup(const char* ip){
+    if (ip == NULL){
+        return NULL;
+    }
     struct in_addr addr;
     struct hostent* h;
  
@@ -15,8 +18,10 @@ char* reverseDnsLookup(const char* ip){
     return strdup(h->h_name);
 }
 
-char* dnsLookup(const char * hostname){
-
+char* dnsLookup(const char* hostname){
+    if (hostname == NULL){
+        return NULL;
+    }
     struct in_addr addr;
     struct hostent* h;
 

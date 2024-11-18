@@ -7,27 +7,40 @@
 #define PASS_ANONYMOUS "anonymous"
 
 int ipAndHostChecker(char* hostname, char* ip){
+    
+    if (hostname == NULL){
+        fprintf(stderr,"No hostname specified");
+        return -1;
+    }
+
     char* dnsResult = dnsLookup(hostname);
     if (dnsResult != NULL) {
         strncpy(ip, dnsResult, URL_FIELD_MAX_LENGTH);
         ip[URL_FIELD_MAX_LENGTH] = '\0'; 
     } 
     else {
-        char* reverseDnsResult = reverseDnsLookup(hostname);
-        if (reverseDnsResult != NULL) {
-            strncpy(ip, hostname, URL_FIELD_MAX_LENGTH);
-            ip[URL_FIELD_MAX_LENGTH] = '\0';
-            strncpy(hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-            hostname[URL_FIELD_MAX_LENGTH] = '\0';
-        } else {
-            fprintf(stderr,"ERROR: Invalid host name or IP\n");
-            return -1;
+        if (isdigit(hostname[0])) {
+            char* reverseDnsResult = reverseDnsLookup(hostname);
+            if (reverseDnsResult != NULL) {
+                strncpy(ip, hostname, URL_FIELD_MAX_LENGTH);
+                ip[URL_FIELD_MAX_LENGTH] = '\0';
+                strncpy(hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
+                hostname[URL_FIELD_MAX_LENGTH] = '\0';
+            } else {
+                fprintf(stderr,"ERROR: Invalid host name or IP\n");
+                return -1;
+            }
         }
     }
     return 0;
 }
 
 int ftpUrlParser(const char* url, FTP_Parameters* parameters){
+
+    if (url == NULL || parameters == NULL){
+        fprintf(stderr,"ERROR: Null pointer\n");
+        return -1;
+    }
 
     // Url prefix
     if (strncmp(url,"ftp://",FTP_PREFIX_SIZE) != 0){

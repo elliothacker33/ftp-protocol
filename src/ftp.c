@@ -8,7 +8,7 @@ int main(int argc, char **argv){
         printf("Example: download ftp://[<user>:<password>@]<host>/<url-path>\n");
         exit(-1);
     }
-
+    
     // Parse other arguments
     FTP_Parameters ftpParams;
     
