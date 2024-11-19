@@ -61,7 +61,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             if (usernameLength == 0){
                 parameters->username[0] = '\0';
             }
-            else if (usernameLength > 0 && usernameLength < URL_FIELD_MAX_LENGTH){
+            else if (usernameLength > 0 && usernameLength <= URL_FIELD_MAX_LENGTH){
                 strncpy(parameters->username, url, usernameLength);
                 parameters->username[usernameLength] = '\0';
                 
@@ -80,7 +80,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             if (passwordLength == 0){
                 parameters->password[0] = '\0';
             }
-            else if (passwordLength > 0 && passwordLength < URL_FIELD_MAX_LENGTH){
+            else if (passwordLength > 0 && passwordLength <= URL_FIELD_MAX_LENGTH){
                 strncpy(parameters->password,posColon + 1,passwordLength);
                 parameters->password[passwordLength] = '\0';
 
@@ -98,12 +98,11 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             // Only has username, but no password - Example: ftp://username@ftp.up.pt......
             // Username
             int usernameLength = posArr - url;
-            if (usernameLength > URL_FIELD_MAX_LENGTH) {
-                fprintf(stderr, "ERROR: Username is too long\n");
-                return -1;
+        
+            if (usernameLength == 0){
+                parameters->username[0] = '\0'; // Empty username
             }
-
-            if (usernameLength > 0) {
+            else if (usernameLength > 0 && usernameLength <= URL_FIELD_MAX_LENGTH) {
                 strncpy(parameters->username, url, usernameLength);
                 parameters->username[usernameLength] = '\0';
 
@@ -112,7 +111,8 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     return -1;
                 }
             } else {
-                parameters->username[0] = '\0'; // Empty username
+                fprintf(stderr, "ERROR: Username is too long\n");
+                return -1;
             }
             // Password
             parameters->password[0] = '\0'; // Password not given, assume empty
@@ -249,7 +249,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         else{
             // Only has host, and default ftp port
             int hostNameLength = strlen(url);
-            if (hostNameLength > URL_FIELD_MAX_LENGTH){
+            if (hostNameLength > URL_FIELD_MAX_LENGTH || hostNameLength <= 0){
                 fprintf(stderr,"ERROR: Host name is too long\n");
                 return -1;
             }
