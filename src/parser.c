@@ -1,10 +1,30 @@
 #include "parser.h"
 
 #define FTP_DEFAULT_PORT 21
+#define FTP_DEFAULT_TYPE_CODE 'i'
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
 #define USER_ANONYMOUS "anonymous"
-#define PASS_ANONYMOUS "anonymous"
+#define PASS_ANONYMOUS "up202108845@edu.fe.up.pt" // Email address (optional)
+
+
+int decodePercent(char* parameter){
+    
+    int length = strlen(parameter);
+    for (int i = 0; i < length; i++) {
+        if (parameter[i] == '%') {
+            if (i + 2 < length && isxdigit(parameter[i + 1]) && isxdigit(parameter[i + 2])) {
+                char hex[3] = { parameter[i + 1], parameter[i + 2], '\0' }; 
+                char eqChar = (char)strtol(hex, NULL, 16);
+                parameter[i] = eqChar; 
+
+                memmove(&parameter[i + 1], &parameter[i + 3], length - i - 2);
+                length -= 2; 
+            }
+        }
+    }
+    return 0;
+}
 
 int ipAndHostChecker(char* hostname, char* ip){
     
@@ -14,18 +34,21 @@ int ipAndHostChecker(char* hostname, char* ip){
     }
 
     char* dnsResult = dnsLookup(hostname);
-    if (dnsResult != NULL) {
-        strncpy(ip, dnsResult, URL_FIELD_MAX_LENGTH);
-        ip[URL_FIELD_MAX_LENGTH] = '\0'; 
+    if (dnsResult) {
+        int dnsResultLength = strlen(dnsResult);
+        strncpy(ip, dnsResult, dnsResultLength);
+        ip[dnsResultLength] = '\0';
     } 
     else {
         if (isdigit(hostname[0])) {
             char* reverseDnsResult = reverseDnsLookup(hostname);
-            if (reverseDnsResult != NULL) {
-                strncpy(ip, hostname, URL_FIELD_MAX_LENGTH);
-                ip[URL_FIELD_MAX_LENGTH] = '\0';
-                strncpy(hostname, reverseDnsResult, URL_FIELD_MAX_LENGTH);
-                hostname[URL_FIELD_MAX_LENGTH] = '\0';
+            if (reverseDnsResult) {
+                int hostnameLength = strlen(hostname);
+                strncpy(ip, hostname, hostnameLength);
+                ip[hostnameLength] = '\0';
+                int reverseDnsResultLength = strlen(reverseDnsResult);
+                strncpy(hostname, reverseDnsResult, reverseDnsResultLength);
+                hostname[reverseDnsResultLength] = '\0';
             } else {
                 fprintf(stderr,"ERROR: Invalid host name or IP\n");
                 return -1;
@@ -65,9 +88,16 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                 strncpy(parameters->username, url, usernameLength);
                 parameters->username[usernameLength] = '\0';
                 
+                // Speacial chars
                 if (strchr(parameters->username, '/')) {
                     fprintf(stderr, "ERROR: Username contains '/'\n");
                     return -1;
+                }
+
+                if (strrchr(parameters->username, '%')){
+                    if (decodePercent(parameters->username) == -1){
+                        return -1;
+                    }
                 }
             }
             else{
@@ -87,6 +117,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                 if (strchr(parameters->password, '/') || strchr(parameters->password, ':')) {
                     fprintf(stderr, "ERROR: Username contains ':' or '/'\n");
                     return -1;
+                }
+
+                if (strrchr(parameters->password, '%')){
+                    if (decodePercent(parameters->password) == -1){
+                        return -1;
+                    }
                 }
             }
             else{
@@ -110,6 +146,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     fprintf(stderr, "ERROR: Username contains '/'\n");
                     return -1;
                 }
+
+                if (strrchr(parameters->username, '%')){
+                    if (decodePercent(parameters->username) == -1){
+                        return -1;
+                    }
+                }
             } else {
                 fprintf(stderr, "ERROR: Username is too long\n");
                 return -1;
@@ -123,6 +165,11 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         // Anonymous account - Example: ftp://ftp.up.pt......
         int anonymousUserLength = sizeof(USER_ANONYMOUS);
         int anonymousPasswordLength = sizeof(PASS_ANONYMOUS);
+
+        if (anonymousUserLength > URL_FIELD_MAX_LENGTH || anonymousPasswordLength > URL_FIELD_MAX_LENGTH){
+            fprintf(stderr,"ERROR: Username or password is too long\n");
+            return -1;
+        }
 
         strncpy(parameters->username, USER_ANONYMOUS, anonymousUserLength);
         parameters->username[anonymousUserLength] = '\0';
@@ -146,6 +193,13 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
+
+            // Decoding hostname
+            if (strrchr(parameters->hostname, '%')){
+                if (decodePercent(parameters->hostname) == -1){
+                    return -1;
+                }
+            }
 
             // Hostname or IP validity check
             if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
@@ -191,6 +245,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
 
+            if (strrchr(parameters->hostname, '%')){
+                if (decodePercent(parameters->hostname) == -1){
+                    return -1;
+                }
+            }
+
              // Hostname or IP validity check
             if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
@@ -213,6 +273,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
+
+            if (strrchr(parameters->hostname, '%')){
+                if (decodePercent(parameters->hostname) == -1){
+                    return -1;
+                }
+            }
 
              // Hostname or IP validity check
             if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
@@ -257,6 +323,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->hostname, url, hostNameLength);
             parameters->hostname[hostNameLength] = '\0';
 
+            if (strrchr(parameters->hostname, '%')){
+                if (decodePercent(parameters->hostname) == -1){
+                    return -1;
+                }
+            }
+
              // Hostname or IP validity check
             if (ipAndHostChecker(parameters->ip, parameters->hostname) == -1){
                 return -1;
@@ -268,26 +340,103 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
     // Path format depends on the file system
     if (posSlash != NULL){
-        url = posSlash + 1;
-        int urlPathLength = strlen(url);
-        if (urlPathLength == 0){
-            parameters->path[0] = '\0';
+        url = posSlash;
+
+        char* lastToken = strdup(url) + 1;
+        char* token = NULL;
+        int totalCwdLen = 0;
+
+        // CWD
+        while ((token = strchr(lastToken,'/'))){
+            int cwdLen = token - lastToken;
+            if (cwdLen > 0){
+                char cwd[cwdLen + 1];
+                strncpy(cwd, lastToken, cwdLen);
+                cwd[cwdLen] = '\0';
+
+                if (strchr(cwd, ';')){
+                    fprintf(stderr,"ERROR: Invalid character in path\n");
+                    return -1;
+                }
+
+                if (strchr(cwd, '%')){
+                    if (decodePercent(cwd) == -1){
+                        return -1;
+                    }
+                }
+
+                strncat(parameters->directories, cwd, cwdLen);
+                strcat(parameters->directories, "/");
+                totalCwdLen += cwdLen + 1;
+    
+            }
+            lastToken = token + 1;
         }
-        else if (urlPathLength > 0 && urlPathLength < URL_MAX_PATH_LENGTH){
-            strncpy(parameters->path, url, urlPathLength);
-            parameters->path[urlPathLength] = '\0';
+
+        if (totalCwdLen > 0){
+            parameters->directories[totalCwdLen - 1] = '\0';
         }
         else{
-            fprintf(stderr,"ERROR: URL path is too long\n");
+            parameters->directories[totalCwdLen] = '\0';
+        }
+
+        // Name and typecode
+        char* posV = strchr(lastToken, ';');
+        int fileLen;
+        if (posV != NULL){
+            fileLen = posV - lastToken;
+        }
+        else{
+            fileLen = strlen(lastToken);
+        }
+
+        if (fileLen == 0){
+            parameters->filename[0] = '\0';
+        }
+        else if (fileLen > 0 && fileLen <= URL_FIELD_MAX_LENGTH){
+            strncpy(parameters->filename, lastToken, fileLen);
+            parameters->filename[fileLen] = '\0';
+
+            if (strchr(parameters->filename,'%')){
+                if (decodePercent(parameters->filename) == -1){
+                    return -1;
+                }
+            }
+        }
+        else {
+            fprintf(stderr,"ERROR: File name is too long\n");
             return -1;
-        }   
-    }
-    else{
-        parameters->path[0] = '\0'; // root path
+        }
+
+        // Typecode
+        if (posV != NULL){
+            if (strncmp(posV + 1, "type=", 5) != 0){
+                fprintf(stderr,"ERROR: Invalid typecode format\n");
+                return -1;
+            }
+            char* typeCode = posV + 6;
+            if ((*typeCode == 'i' || *typeCode == 'I' || *typeCode == 'a' || *typeCode == 'A' || *typeCode == 'd' || *typeCode == 'D') && *(typeCode + 1) == '\0'){
+                parameters->typecode = *typeCode;
+            }
+            else{
+                fprintf(stderr,"ERROR: Invalid typecode format\n");
+                return -1;
+            }
+        }
+        else {
+            parameters->typecode = FTP_DEFAULT_TYPE_CODE;
+        }
+    }  
+    else {
+        parameters->directories[0] = '\0'; 
+        parameters->filename[0] = '\0';
+        parameters->typecode = '\0';
     }
 
 
-    printf("Path: %s\n", parameters->path);
+    printf("File: %s\n", parameters->filename);
+    printf("Directory: %s\n", parameters->directories);
+    printf("Typecode: %c\n", parameters->typecode);
     printf("Username: %s\n", parameters->username);
     printf("Password: %s\n", parameters->password);
     printf("Domain: %s\n", parameters->hostname);

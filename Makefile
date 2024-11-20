@@ -5,9 +5,9 @@ SRC = src
 INCLUDE = include
 BIN = bin
 
-SRC_FILES = $(wildcard $(SRC)/*.c)  
+SRC_FILES = $(wildcard $(SRC)/*.c)
 
- # Targets
+# Targets
 download: $(BIN)/download  
 
 $(BIN)/download: $(SRC_FILES)
@@ -25,5 +25,7 @@ install: $(BIN)/download
 
 uninstall:
 	sudo rm -f /usr/local/bin/download           
+
 clean:
 	rm -f $(BIN)/download
+
