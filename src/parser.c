@@ -363,6 +363,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     if (decodePercent(cwd) == -1){
                         return -1;
                     }
+                    cwdLen -= 2;
                 }
 
                 strncat(parameters->directories, cwd, cwdLen);
