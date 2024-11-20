@@ -9,12 +9,16 @@ char* reverseDnsLookup(const char* ip){
     }
     struct in_addr addr;
     struct hostent* h;
- 
+
     if (inet_aton(ip, &addr) == 0){
         return NULL;
     }
 
     h = gethostbyaddr((const void*) &addr,sizeof(addr),IPV4);
+    if (h == NULL){
+        herror("gethostbyaddr()");
+        exit(-1);
+    }
     return strdup(h->h_name);
 }
 

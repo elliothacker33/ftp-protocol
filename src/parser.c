@@ -134,7 +134,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             // Only has username, but no password - Example: ftp://username@ftp.up.pt......
             // Username
             int usernameLength = posArr - url;
-        
+
             if (usernameLength == 0){
                 parameters->username[0] = '\0'; // Empty username
             }
@@ -250,7 +250,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     return -1;
                 }
             }
-
+            
             // Hostname or IP validity check
             if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
