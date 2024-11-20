@@ -251,7 +251,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                 }
             }
 
-             // Hostname or IP validity check
+            // Hostname or IP validity check
             if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
             }
@@ -279,7 +279,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     return -1;
                 }
             }
-
+        
              // Hostname or IP validity check
             if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
@@ -328,9 +328,9 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     return -1;
                 }
             }
-
-             // Hostname or IP validity check
-            if (ipAndHostChecker(parameters->ip, parameters->hostname) == -1){
+            
+            // Hostname or IP validity check
+            if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
                 return -1;
             }
 
