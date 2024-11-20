@@ -16,6 +16,16 @@ int main(int argc, char **argv){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
         exit(-1);
     }
+    
+    // Pararameters
+    printf("Username: %s\n", ftpParams.username);
+    printf("Password: %s\n", ftpParams.password);
+    printf("Host: %s\n", ftpParams.hostname);
+    printf("Ip: %s, IPV4\n", ftpParams.ip);
+    printf("Port: %d\n", ftpParams.port);
+    printf("Directory: %s\n", ftpParams.directories);
+    printf("Filename: %s\n", ftpParams.filename);
+    printf("Typecode: %c\n", ftpParams.typecode);
 
     // FTP server - Connect (PORT)
 

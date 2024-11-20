@@ -437,16 +437,6 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         parameters->filename[0] = '\0';
         parameters->typecode = '\0';
     }
-
-
-    printf("File: %s\n", parameters->filename);
-    printf("Directory: %s\n", parameters->directories);
-    printf("Typecode: %c\n", parameters->typecode);
-    printf("Username: %s\n", parameters->username);
-    printf("Password: %s\n", parameters->password);
-    printf("Domain: %s\n", parameters->hostname);
-    printf("IP: %s\n", parameters->ip);
-    printf("Port: %d\n", parameters->port);
-
+    
     return 0;
 }
