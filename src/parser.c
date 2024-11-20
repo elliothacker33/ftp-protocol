@@ -373,11 +373,15 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             lastToken = token + 1;
         }
 
-        if (totalCwdLen > 0){
+        if (totalCwdLen == 0){
+            parameters->directories[totalCwdLen] = '\0';
+        }
+        else if (totalCwdLen > 0 && totalCwdLen <= URL_MAX_PATH_LENGTH){
             parameters->directories[totalCwdLen - 1] = '\0';
         }
         else{
-            parameters->directories[totalCwdLen] = '\0';
+            fprintf(stderr,"ERROR: Path is too long\n");
+            return -1;
         }
 
         // Name and typecode
