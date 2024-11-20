@@ -5,7 +5,7 @@
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
 #define USER_ANONYMOUS "anonymous"
-#define PASS_ANONYMOUS "up202108845@edu.fe.up.pt" // Email address (optional)
+#define PASS_ANONYMOUS "upXXXXXXXXX@edu.fe.up.pt" // Email address (optional)
 
 
 int decodePercent(char* parameter){
