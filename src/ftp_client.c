@@ -1,4 +1,4 @@
-#include "ftp.h"
+#include "ftp_client.h"
 
 int main(int argc, char **argv){
     
@@ -9,14 +9,13 @@ int main(int argc, char **argv){
         exit(-1);
     }
     
-    // Parse other arguments
     FTP_Parameters ftpParams;
-    
+    memset(&ftpParams, 0, sizeof(FTP_Parameters));
     if (ftpUrlParser(argv[1], &ftpParams) != 0){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
         exit(-1);
     }
-    
+
     // Pararameters
     printf("Username: %s\n", ftpParams.username);
     printf("Password: %s\n", ftpParams.password);
@@ -27,22 +26,12 @@ int main(int argc, char **argv){
     printf("Filename: %s\n", ftpParams.filename);
     printf("Typecode: %c\n", ftpParams.typecode);
 
-    // FTP server - Connect (PORT)
 
-    // FTP server - Login ((USR;PASS))
-    
-    // FTP server - Find file (CWD)
+    // Login
 
-    // FTP server - Change to binary format (TYPE)
+    // Download
 
-    // FTP server - Get file size (SIZE)
-
-    // FTP server - Assert mode (MODE) 
-
-    // FTP server - Download file (RETR)
-
-    // FTP server - Logout (QUIT)
-
+    // Logout
 
     return 0;
 }
