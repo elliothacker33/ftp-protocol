@@ -38,20 +38,17 @@ int ipAndHostChecker(char* hostname, char* ip){
     char* dnsResult = dnsLookup(hostname);
     if (dnsResult) {
         // Ip = dnsResult
-        int dnsResultLength = strlen(dnsResult);
-        strncpy(ip, dnsResult, dnsResultLength);
+        memcpy(ip, dnsResult, strlen(dnsResult));
     } 
     else {
         if (isdigit(hostname[0])) {
             char* reverseDnsResult = reverseDnsLookup(hostname);
             if (reverseDnsResult) {
                 // Ip = hostname
-                int hostnameLength = strlen(hostname);
-                strncpy(ip, hostname, hostnameLength);
-
+                memcpy(ip, hostname, strlen(hostname));
                 // Hostname = reverseDnsResult
-                int reverseDnsResultLength = strlen(reverseDnsResult);
-                strncpy(hostname, reverseDnsResult, reverseDnsResultLength);
+                memcpy(hostname, reverseDnsResult, strlen(reverseDnsResult));
+
             } else {
                 fprintf(stderr,"ERROR: Invalid host name or IP\n");
                 return -1;
@@ -90,12 +87,16 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             usernameLength = posArr - url;
             passwordLength = 0;
         }
+        else{
+            fprintf(stderr,"ERROR: Invalid url format\n");
+            return -1;
+        }
 
         // Case 1: ftp://username:password@... or ftp://username@... 
         // Username
         if (usernameLength > 0 && usernameLength <= URL_FIELD_MAX_LENGTH){
-            strncpy(parameters->username, url, usernameLength);
-            
+            memcpy(parameters->username, url, usernameLength);
+
             // Prohibited chars
             if (strchr(parameters->username, '/')) {
                 fprintf(stderr, "ERROR: Username contains '/'\n");
@@ -116,7 +117,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
         // Password
         if (passwordLength > 0 && passwordLength <= URL_FIELD_MAX_LENGTH){
-            strncpy(parameters->password,posColon + 1,passwordLength);
+            memcpy(parameters->password,posColon + 1,passwordLength);
             
             // Prohibited chars
             if (strchr(parameters->password, '/') || strchr(parameters->password, ':')) {
@@ -144,8 +145,8 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         int anonymousPasswordLength = sizeof(PASS_ANONYMOUS);
 
         if (anonymousUserLength > 0 && anonymousUserLength <= URL_FIELD_MAX_LENGTH && anonymousPasswordLength > 0 && anonymousPasswordLength <= URL_FIELD_MAX_LENGTH){
-            strncpy(parameters->username, USER_ANONYMOUS, anonymousUserLength);
-            strncpy(parameters->password, PASS_ANONYMOUS, anonymousPasswordLength);
+            memcpy(parameters->username, USER_ANONYMOUS, anonymousUserLength);
+            memcpy(parameters->password, PASS_ANONYMOUS, anonymousPasswordLength);
         }
         else if (anonymousUserLength > URL_FIELD_MAX_LENGTH || anonymousPasswordLength > URL_FIELD_MAX_LENGTH){
             fprintf(stderr, "ERROR: Invalid username or password size\n");
@@ -173,7 +174,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
     // Hostname
     if (hostNameLength > 0 && hostNameLength <= URL_FIELD_MAX_LENGTH){
-        strncpy(parameters->hostname, url, hostNameLength);
+        memcpy(parameters->hostname, url, hostNameLength);
 
         // Special chars
         if (strrchr(parameters->hostname, '%')){
@@ -216,7 +217,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             return -1;
         }
 
-        strncpy(port, posColon, actualPortLenght);
+        memcpy(port, posColon, actualPortLenght);
         port[actualPortLenght] = '\0';
 
         if (strchr(port,'%')){
@@ -258,7 +259,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             int cwdLen = token - lastToken;
             if (cwdLen > 0){
                 char cwd[cwdLen + 1];
-                strncpy(cwd, lastToken, cwdLen);
+                memcpy(cwd, lastToken, cwdLen);
                 cwd[cwdLen] = '\0';
 
                 if (strchr(cwd, ';')){
@@ -300,7 +301,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         }
 
         if (fileLen > 0 && fileLen <= URL_FIELD_MAX_LENGTH){
-            strncpy(parameters->filename, lastToken, fileLen);
+            memcpy(parameters->filename, lastToken, fileLen);
 
             if (strchr(parameters->filename,'%')){
                 if (decodePercent(parameters->filename) == -1){
@@ -328,7 +329,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             int fakeTypeCodeLen = strlen(typeCode);
             char fakeTypeCode[fakeTypeCodeLen + 1];
 
-            strncpy(fakeTypeCode, typeCode, fakeTypeCodeLen); 
+            memcpy(fakeTypeCode, typeCode, fakeTypeCodeLen); 
             fakeTypeCode[fakeTypeCodeLen] = '\0';
 
             if (strchr(fakeTypeCode,'%')){

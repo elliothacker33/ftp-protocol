@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -g -O2
 
 SRC = src
 INCLUDE = include
@@ -28,4 +28,10 @@ uninstall:
 
 clean:
 	rm -f $(BIN)/download
+
+# Debugging
+valgrind: $(BIN)/download
+	valgrind --tool=callgrind  ./$(BIN)/download ftp://usernamessss:password@google.com:21/path/to/file;type=i
+
+
 
