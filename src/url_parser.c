@@ -278,6 +278,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     }
                     cwdLen = strlen(cwd);
                 }
+
+                if(strchr(cwd,'/')){
+                    fprintf(stderr,"ERROR: Invalid directory character\n");
+                    return -1;
+                }
+    
                 totalCwdLen += cwdLen;
                 if (totalCwdLen > URL_MAX_PATH_LENGTH){
                     fprintf(stderr,"ERROR: Invalid directory size\n");
