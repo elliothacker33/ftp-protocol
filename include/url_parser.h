@@ -26,7 +26,7 @@ typedef struct {
 
 /**
  * @brief This function decodes percent-encoded characters in the given url parameter.
- * @param str - pointer to the string to decode
+ * @param parameter - pointer to the string to decode
  * @return -1 in case of error, 0 otherwise
  */
 int decodePercent(char* parameter);
