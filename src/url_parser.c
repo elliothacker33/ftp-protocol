@@ -18,7 +18,7 @@ int decodePercent(char* parameter){
                 parameter[i] = eqChar; 
 
                 if (memmove(&parameter[i + 1], &parameter[i + 3], length - i - 2) == NULL){
-                    fprintf(stderr,"Memory allocation failed");
+                    fprintf(stderr,"ERROR: Memory allocation failed");
                     return -1;
                 }
                 length -= 2; 
@@ -31,7 +31,7 @@ int decodePercent(char* parameter){
 int ipAndHostChecker(char* hostname, char* ip){
     
     if (!hostname){
-        fprintf(stderr,"No hostname specified");
+        fprintf(stderr,"ERROR: No hostname specified");
         return -1;
     }
 
@@ -110,7 +110,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
         }
         else if (usernameLength > URL_FIELD_MAX_LENGTH){
-            fprintf(stderr,"ERROR: Username is too long\n");
+            fprintf(stderr,"ERROR: Invalid username size\n");
             return -1;
         }
 
@@ -132,7 +132,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
         }
         else if (passwordLength > URL_FIELD_MAX_LENGTH){
-            fprintf(stderr,"ERROR: Password is too long\n");
+            fprintf(stderr,"ERROR: Invalid password size\n");
             return -1;
         }
 
@@ -148,7 +148,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             strncpy(parameters->password, PASS_ANONYMOUS, anonymousPasswordLength);
         }
         else if (anonymousUserLength > URL_FIELD_MAX_LENGTH || anonymousPasswordLength > URL_FIELD_MAX_LENGTH){
-            fprintf(stderr, "ERROR: Anonymous account username or password is too long\n");
+            fprintf(stderr, "ERROR: Invalid username or password size\n");
             return -1;
         }
     }
@@ -188,7 +188,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         }
     }
     else{
-        fprintf(stderr,"ERROR: Host name is too long\n");
+        fprintf(stderr,"ERROR: Invalid hostname size\n");
         return -1;
     }
 
@@ -212,7 +212,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         }
     
         if (actualPortLenght > URL_FIELD_MAX_LENGTH){
-            fprintf(stderr,"ERROR: Port number is too long\n");
+            fprintf(stderr,"ERROR: Invalid port size\n");
             return -1;
         }
 
@@ -285,7 +285,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             parameters->directories[totalCwdLen - 1] = '\0';
         }
         else if (totalCwdLen > URL_MAX_PATH_LENGTH){
-            fprintf(stderr,"ERROR: Path is too long\n");
+            fprintf(stderr,"ERROR: Invalid directory size\n");
             return -1;
         }
 
@@ -309,7 +309,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
         }
         else if (fileLen > URL_FIELD_MAX_LENGTH){
-            fprintf(stderr,"ERROR: File name is too long\n");
+            fprintf(stderr,"ERROR: Invalid filename size\n");
             return -1;
         }
 
