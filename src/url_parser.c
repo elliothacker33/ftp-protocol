@@ -1,9 +1,10 @@
 #include "url_parser.h"
 
 #define FTP_DEFAULT_PORT 21
-#define FTP_DEFAULT_TYPE_CODE 'i'
+#define FTP_DEFAULT_TYPE_CODE "i"
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
+#define URL_MAX_PORT_LENGTH 15
 #define USER_ANONYMOUS "anonymous"
 #define PASS_ANONYMOUS "upXXXXXXXXX@edu.fe.up.pt" // Email address (optional)
 
@@ -203,31 +204,31 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             return -1;
         }
 
-        char port[URL_FIELD_MAX_LENGTH + 1];
-        int actualPortLenght = 0;
+        char port[URL_MAX_PORT_LENGTH + 1];
+        int portLenght = 0;
 
         char* posColonAux = posColon;
         while (*posColonAux != portToken){
-            actualPortLenght++;
+            portLenght++;
             posColonAux++;
         }
     
-        if (actualPortLenght > URL_FIELD_MAX_LENGTH){
+        if (portLenght > URL_MAX_PORT_LENGTH){
             fprintf(stderr,"ERROR: Invalid port size\n");
             return -1;
         }
 
-        memcpy(port, posColon, actualPortLenght);
-        port[actualPortLenght] = '\0';
+        memcpy(port, posColon, portLenght);
+        port[portLenght] = '\0';
 
         if (strchr(port,'%')){
             if (decodePercent(port) == -1){
                 return -1;
             }
-            actualPortLenght = strlen(port);
+            portLenght = strlen(port);
         }
         
-        for (int i = 0; i < actualPortLenght; i++){
+        for (int i = 0; i < portLenght; i++){
             if (!isdigit(port[i])){
                 fprintf(stderr,"ERROR: Invalid port number\n");
                 return -1;
@@ -242,6 +243,10 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
     }
     else if (!posColon || (posColon && posColon > posSlash)){
         // Case 2: ftp://hostname/ or ftp//hostname
+        if (FTP_DEFAULT_PORT <= 0 || parameters->port > FTP_MAX_PORT){
+            fprintf(stderr,"ERROR: Invalid default port size\n");
+            return -1;
+        }
         parameters->port = FTP_DEFAULT_PORT;
     }
     
@@ -273,21 +278,30 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     }
                     cwdLen = strlen(cwd);
                 }
-
+                totalCwdLen += cwdLen;
+                if (totalCwdLen > URL_MAX_PATH_LENGTH){
+                    fprintf(stderr,"ERROR: Invalid directory size\n");
+                    return -1;
+                }
                 strncat(parameters->directories, cwd, cwdLen);
-                strcat(parameters->directories, "/");
-                totalCwdLen += cwdLen + 1;
-    
+                if (totalCwdLen + 1 <= URL_MAX_PATH_LENGTH){
+                    totalCwdLen++;
+                    strcat(parameters->directories, "/");
+                }
+            }
+            else{
+                totalCwdLen++;
+                if (totalCwdLen > URL_MAX_PATH_LENGTH){
+                    fprintf(stderr,"ERROR: Invalid directory size\n");
+                    return -1;
+                }
             }
             lastToken = token + 1;
         }
 
-        if (totalCwdLen > 0 && totalCwdLen <= URL_MAX_PATH_LENGTH){
-            parameters->directories[totalCwdLen - 1] = '\0';
-        }
-        else if (totalCwdLen > URL_MAX_PATH_LENGTH){
-            fprintf(stderr,"ERROR: Invalid directory size\n");
-            return -1;
+        int lastChar = strlen(parameters->directories) - 1;
+        if (parameters->directories[lastChar] == '/'){
+            parameters->directories[lastChar] = '\0';
         }
 
         // File name
@@ -348,7 +362,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
         }
         else {
-            parameters->typecode = FTP_DEFAULT_TYPE_CODE;
+            if (strlen(FTP_DEFAULT_TYPE_CODE) == 1 && strchr("iIaAdD", FTP_DEFAULT_TYPE_CODE[0])) {
+                parameters->typecode = FTP_DEFAULT_TYPE_CODE[0];
+            } else {
+                fprintf(stderr, "ERROR: Invalid typecode format\n");
+                return -1;
+            }
         }
     }
     
