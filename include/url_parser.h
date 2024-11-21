@@ -9,7 +9,7 @@
 #include <ctype.h>
 #include "dns.h"
 #define URL_FIELD_MAX_LENGTH 255
-#define URL_MAX_PATH_LENGTH  20
+#define URL_MAX_PATH_LENGTH  1024
 
 
 typedef struct {
