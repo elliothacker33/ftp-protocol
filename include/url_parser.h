@@ -23,13 +23,20 @@ typedef struct {
     int port;
 } FTP_Parameters;
 
+
+/**
+ * @brief This function decodes percent-encoded characters in the given url parameter.
+ * @param str - pointer to the string to decode
+ * @return -1 in case of error, 0 otherwise
+ */
+int decodePercent(char* parameter);
+
 /**
  * @brief This function is used to check if ip and hostname are valid
  * @param hostname - hostname address
  * @param ip - ip address
  * @return -1 in case of error, 0 otherwise.
  */
-
 int ipAndHostChecker(char* hostname, char* ip);
 
 /**

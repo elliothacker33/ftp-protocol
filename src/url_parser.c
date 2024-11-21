@@ -162,12 +162,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
     if ((posSlash && posColon && posColon < posSlash) || (!posSlash && posColon && posColon < posSlash)){
         hostNameLength = posColon - url; 
-        if (posSlash){
-            portToken = '/';
-        }
-        else{
-            portToken = '\0';
-        }
+        portToken = posSlash ? '/' : '\0';
     }
     else if (posSlash && (!posColon || (posColon && posColon > posSlash))){
         hostNameLength = posSlash - url;
@@ -214,6 +209,11 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         while (*posColonAux != portToken){
             actualPortLenght++;
             posColonAux++;
+        }
+    
+        if (actualPortLenght > URL_FIELD_MAX_LENGTH){
+            fprintf(stderr,"ERROR: Port number is too long\n");
+            return -1;
         }
 
         strncpy(port, posColon, actualPortLenght);
