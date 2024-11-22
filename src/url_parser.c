@@ -5,6 +5,7 @@
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
 #define URL_MAX_PORT_LENGTH 15
+
 #define USER_ANONYMOUS "anonymous"
 #define PASS_ANONYMOUS "upXXXXXXXXX@edu.fe.up.pt" // Email address (optional)
 
