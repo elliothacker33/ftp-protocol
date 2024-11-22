@@ -257,12 +257,15 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         url = posSlash;
         char* lastToken = strdup(url) + 1;
         char* token = NULL;
-        int totalCwdLen = 0;
+        int i = 0;
+        int totalCwd = 0;
 
         // Directory 
         while ((token = strchr(lastToken,'/'))){
             int cwdLen = token - lastToken;
-            if (cwdLen > 0){
+            totalCwd++;
+
+            if (cwdLen > 0 && cwdLen <= URL_FIELD_MAX_LENGTH && totalCwd <= URL_MAX_CWD) {
                 char cwd[cwdLen + 1];
                 memcpy(cwd, lastToken, cwdLen);
                 cwd[cwdLen] = '\0';
@@ -279,36 +282,20 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     cwdLen = strlen(cwd);
                 }
 
-                if(strchr(cwd,'/')){
-                    fprintf(stderr,"ERROR: Invalid directory character\n");
-                    return -1;
-                }
-    
-                totalCwdLen += cwdLen;
-                if (totalCwdLen > URL_MAX_PATH_LENGTH){
-                    fprintf(stderr,"ERROR: Invalid directory size\n");
-                    return -1;
-                }
-                strncat(parameters->directories, cwd, cwdLen);
-                if (totalCwdLen + 1 <= URL_MAX_PATH_LENGTH){
-                    totalCwdLen++;
-                    strcat(parameters->directories, "/");
-                }
+                strncpy(parameters->directories[i++], cwd, cwdLen);
+            }
+            else if (cwdLen == 0 && totalCwd <= URL_MAX_CWD){
+                totalCwd++;
             }
             else{
-                totalCwdLen++;
-                if (totalCwdLen > URL_MAX_PATH_LENGTH){
-                    fprintf(stderr,"ERROR: Invalid directory size\n");
-                    return -1;
-                }
+                fprintf(stderr,"ERROR: Invalid directory size\n");
+                return -1;
             }
             lastToken = token + 1;
         }
+        
+        parameters->directories[i][0] = '\0';
 
-        int lastChar = strlen(parameters->directories) - 1;
-        if (parameters->directories[lastChar] == '/'){
-            parameters->directories[lastChar] = '\0';
-        }
 
         // File name
         char* posV = strchr(lastToken, ';');

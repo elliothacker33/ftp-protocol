@@ -22,7 +22,11 @@ int main(int argc, char **argv){
     printf("Host: %s\n", ftpParams.hostname);
     printf("Ip: %s, IPV4\n", ftpParams.ip);
     printf("Port: %d\n", ftpParams.port);
-    printf("Directory: %s\n", ftpParams.directories);
+    int i = 0;
+    while (ftpParams.directories[i][0] != '\0'){
+        printf("Directory %d: %s\n",i+1,ftpParams.directories[i]);
+        i++;
+    }
     printf("Filename: %s\n", ftpParams.filename);
     printf("Typecode: %c\n", ftpParams.typecode);
 

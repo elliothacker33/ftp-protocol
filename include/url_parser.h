@@ -9,14 +9,15 @@
 #include <ctype.h>
 #include "dns.h"
 #define URL_FIELD_MAX_LENGTH 255
-#define URL_MAX_PATH_LENGTH  1024
+#define URL_MAX_CWD 20
+
 
 
 typedef struct {
     char username[URL_FIELD_MAX_LENGTH + 1];
     char password[URL_FIELD_MAX_LENGTH + 1];
     char hostname[URL_FIELD_MAX_LENGTH + 1];
-    char directories[URL_MAX_PATH_LENGTH + 1];
+    char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1];
     char filename[URL_FIELD_MAX_LENGTH + 1];
     char ip[URL_FIELD_MAX_LENGTH + 1]; 
     char typecode;
