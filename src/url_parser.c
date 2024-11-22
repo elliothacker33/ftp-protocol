@@ -282,7 +282,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                     cwdLen = strlen(cwd);
                 }
 
-                strncpy(parameters->directories[i++], cwd, cwdLen);
+                memcpy(parameters->directories[i++], cwd, cwdLen);
             }
             else if (cwdLen == 0 && totalCwd <= URL_MAX_CWD){
                 totalCwd++;
