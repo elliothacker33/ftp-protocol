@@ -13,9 +13,9 @@ int main(int argc, char **argv){
     memset(&ftpParams, 0, sizeof(FTP_Parameters));
     if (ftpUrlParser(argv[1], &ftpParams) != 0){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
-        exit(-1);
+        return EXIT_FAILURE;
     }
-
+    printf("URL PARSER RESULTS\n");
     // Pararameters
     printf("Username: %s\n", ftpParams.username);
     printf("Password: %s\n", ftpParams.password);
@@ -28,14 +28,18 @@ int main(int argc, char **argv){
         i++;
     }
     printf("Filename: %s\n", ftpParams.filename);
-    printf("Typecode: %c\n", ftpParams.typecode);
+    printf("Typecode: %c\n\n", ftpParams.typecode);
 
-
+    printf("CONNECTION CLIENT-SERVER\n");
     // Login
+    if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.port) == -1){
+        fprintf(stderr,"ERROR: Login failed.\n");
+        return EXIT_FAILURE;
+    };
 
     // Download
 
     // Logout
-
-    return 0;
+    logout();
+    return EXIT_SUCCESS;
 }

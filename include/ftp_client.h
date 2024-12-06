@@ -1,8 +1,8 @@
 
 #ifndef _FTP_H_
 #define _FTP_H_
-
 #include "url_parser.h"
+#include "ftp_socket.h"
 #include "dns.h"
 
 /**
