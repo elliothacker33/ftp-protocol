@@ -8,6 +8,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define h_addr h_addr_list[0]
+#define IPV4   AF_INET
+
 /**
  * @brief This function does a reverse DNS lookup. From a given IP address finds the corresponding hostname
  * @param ip The IP address

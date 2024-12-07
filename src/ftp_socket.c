@@ -1,15 +1,13 @@
 #include "ftp_socket.h"
 
-int control_fd;
-int data_fd;
-
 int createConnection(char* ip, int port){
+
     // Socket settings
     struct sockaddr_in server_addr;
     bzero((char*)&server_addr, sizeof(server_addr));
     server_addr.sin_family = IPV4;
     server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = inet_addr(ip);
+    server_addr.sin_addr.s_addr = inet_addr(ip);    
     
     // Create socket
     int fd = socket(IPV4, CONNECTION_TYPE, 0) ;
@@ -21,7 +19,8 @@ int createConnection(char* ip, int port){
     // Connect to server on IP + port
     if (connect(fd, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
         fprintf(stderr, "ERROR: Connection failed\n");
-        return -2;
+        closeConnection(fd);
+        return -1;
     }
     printf("Client: Connection open on %s\n",ip);
 
@@ -29,6 +28,7 @@ int createConnection(char* ip, int port){
 }
 
 int closeConnection(int fd){
+
     // Close socket
     if (close(fd) == -1){
         fprintf(stderr, "ERROR: Socket closing failed\n");
@@ -38,105 +38,112 @@ int closeConnection(int fd){
 }
 
 
-int serverResponse(int fd, char** response) {
-    // Allocate initial memory
-    *response = malloc(sizeof(char));
-    if (*response == NULL) {
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
+int serverResponse(int fd, char* response, int* code) {
+    if (response == NULL || code == NULL){
+        fprintf(stderr, "ERROR: NULL parameters\n");
         return -1;
     }
 
-    int totalBytes = 1;
-    char byte;
+    int totalBytes = 0;
     int digitsRead = 0;
     int state = STATE_WAIT_CODE;
+    *code = 0;
 
     // Machine state for reading
+    char byte;
     while (state != STATE_STOP) {
+        // Read a byte
         int bytesRead = read(fd, &byte, 1);
         if (bytesRead != 1) {
             fprintf(stderr, "ERROR: Read failed\n");
-            free(*response);
             return -1;
         }
-
-        char* temp = realloc(*response, totalBytes + 1); 
-        if (temp == NULL) {
-            fprintf(stderr, "ERROR: Memory reallocation failed\n");
-            free(*response);
-            *response = NULL;
-            return -1;
-        }
-        *response = temp;
-        (*response)[totalBytes - 1] = byte;
-        totalBytes++;
     
+        if (totalBytes >= MAX_CONTROL_SIZE + 1){
+            fprintf(stderr, "ERROR: Response too large\n");
+            return -1;
+        }
+        response[totalBytes++] = byte;
+
+        // Handle state
         switch (state) {
             case STATE_WAIT_CODE:
                 if (isdigit(byte)){
                     digitsRead++;
+                    *code += pow(10, 3 - digitsRead)*(byte - '0');
                     if (digitsRead == 3){
                         digitsRead = 0;
                         state = STATE_WAIT_SP;
                     }
-                    break;
                 }
                 else{
-                    state = STATE_WAIT_CODE;
-                    break;
-                }
-            case STATE_WAIT_SP:
-                if (byte == SP){
-                    state = STATE_WAIT_CR;
-                }
-                else{
+                    digitsRead = 0;
+                    *code = 0;
                     state = STATE_WAIT_CODE;
                 }
                 break;
-
+            case STATE_WAIT_SP:
+                if (byte == ' '){
+                    state = STATE_WAIT_CR;
+                }
+                else{
+                    digitsRead = 0;
+                    *code = 0;
+                    state = STATE_WAIT_CODE;
+                }
+                break;
             case STATE_WAIT_CR:
-                if (byte == CR) {
+                if (byte == '\r') {
                     state = STATE_WAIT_LF;
                 }
                 break;
             case STATE_WAIT_LF:
-                if (byte == LF){
-                    (*response)[totalBytes] = '\0';
+                if (byte == '\n'){
+                    if (totalBytes >= MAX_CONTROL_SIZE + 1){
+                        fprintf(stderr, "ERROR: Response too large\n");
+                        return -1;
+                    }
+                    response[totalBytes] = '\0';
                     state = STATE_STOP;
                 } 
                 break;
             default:
+                digitsRead = 0;
+                *code = 0;
                 state = STATE_WAIT_CODE;
                 break;
         }
     }
-    return totalBytes - 1; 
+    return totalBytes; 
 }
 
 
 // Login
-int login(char *username, char *password, char* ip, int port){
+int login(char *username, char *password, char* ip, char* host, int port){
+
     // Open connection
     control_fd = createConnection(ip,port);
     if (control_fd == -1){
         return -1;
     }
-    else if (control_fd == -2) {
-        closeConnection(control_fd);
+
+    // Receive server response
+    char* response = malloc(MAX_CONTROL_SIZE + 1);
+    if (response == NULL){
+        fprintf(stderr, "ERROR: Memory allocation failed\n");
         return -1;
     }
-    
-    char* response = NULL;
-    int bytesRead = serverResponse(control_fd, &response);
-    if (bytesRead == -1 || response == NULL){
-        response ? NULL : free(response);
+    int code;
+    int bytesRead = serverResponse(control_fd, response, &code);
+    if (bytesRead == -1){
+        free(response);
         closeConnection(control_fd);
         return -1;
     }
     printf("Server: %s\n", response);
 
     // Check code (220)
-    if (strncmp(response, SERVER_READY, CODE_SIZE) != 0){
+    if (code != SERVER_READY){
         fprintf(stderr,"ERROR: Server code not expected\n");
         free(response);
         closeConnection(control_fd);
@@ -145,12 +152,12 @@ int login(char *username, char *password, char* ip, int port){
     free(response);
 
     // Credentials
-    // Username
-    char* commandType = "USER";
-    int commandLength = strlen(commandType) + strlen(username) + 3;
+    // Build (USER) command
+    int commandLength = strlen(COMMAND_USER) + strlen(username) + 3;
     char commandUser[commandLength + 1];
-    sprintf(commandUser, "%s %s\r\n", commandType, username);
+    sprintf(commandUser, "%s %s\r\n", COMMAND_USER, username);
 
+    // Send (USER) command
     int bytesSent = write(control_fd, commandUser, commandLength);
     if (bytesSent != commandLength){
         fprintf(stderr, "ERROR: Number of bytes sent\n");
@@ -158,16 +165,22 @@ int login(char *username, char *password, char* ip, int port){
     }
     printf("Client: %s", commandUser);
 
-    bytesRead = serverResponse(control_fd, &response);
+    response = malloc(MAX_CONTROL_SIZE + 1);
+    if (response == NULL){
+        fprintf(stderr, "ERROR: Memory allocation failed\n");
+        return -1;
+    }
+    // Receive server response
+    bytesRead = serverResponse(control_fd, response, &code);
     if (bytesRead == -1 || response == NULL){
-        response ? NULL : free(response);
+        free(response);
         closeConnection(control_fd);
         return -1;
     }
     printf("Server: %s\n", response);
 
     // Check code (331)
-    if (strncmp(response, SERVER_SPECIFY_PASSWORD, CODE_SIZE) != 0){
+    if (code != SERVER_SPECIFY_PASSWORD){
         fprintf(stderr,"ERROR: Server code not expected\n");
         free(response);
         closeConnection(control_fd);
@@ -175,12 +188,12 @@ int login(char *username, char *password, char* ip, int port){
     }
     free(response);
 
-    // Password
-    commandType = "PASS";
-    commandLength = strlen(commandType) + strlen(password) + 3;
+    // Build (PASS) command
+    commandLength = strlen(COMMAND_PASS) + strlen(password) + 3;
     char commandPass[commandLength + 1];
-    sprintf(commandPass, "%s %s\r\n", commandType, password);
+    sprintf(commandPass, "%s %s\r\n", COMMAND_PASS, password);
 
+    // Send (PASS) command
     bytesSent = write(control_fd, commandPass, commandLength);
     if (bytesSent != commandLength){
         fprintf(stderr, "ERROR: Number of bytes sent\n");
@@ -188,16 +201,22 @@ int login(char *username, char *password, char* ip, int port){
     }
     printf("Client: %s", commandPass);
 
-    bytesRead = serverResponse(control_fd, &response);
+    response = malloc(MAX_CONTROL_SIZE + 1);
+    if (response == NULL){
+        fprintf(stderr, "ERROR: Memory allocation failed\n");
+        return -1;
+    }
+    // Receive server response
+    bytesRead = serverResponse(control_fd, response, &code);
     if (bytesRead == -1 || response == NULL){
-        response ? NULL : free(response);
+        free(response);
         closeConnection(control_fd);
         return -1;
     }
     printf("Server: %s\n", response);
 
-    // Check code (331)
-    if (strncmp(response, SERVER_LOGGED_IN, CODE_SIZE) != 0){
+    // Check code (230)
+    if (code != SERVER_LOGGED_IN) {
         fprintf(stderr,"ERROR: Server code not expected\n");
         free(response);
         closeConnection(control_fd);
@@ -220,28 +239,33 @@ int login(char *username, char *password, char* ip, int port){
 
 // Logout
 int logout(){
-    // Username
-    char* commandQuit = "QUIT\r\n";
-    int commandLength = strlen(commandQuit);
-
-    int bytesSent = write(control_fd, commandQuit, commandLength);
+    
+    // Send (QUIT) command
+    int commandLength = strlen(COMMAND_QUIT);
+    int bytesSent = write(control_fd, COMMAND_QUIT, commandLength);
     if (bytesSent != commandLength){
         fprintf(stderr, "ERROR: Number of bytes sent\n");
         return -1;
     }
-    printf("Client: %s", commandQuit);
+    printf("Client: %s", COMMAND_QUIT);
 
-    char* response = NULL;
-    int bytesRead = serverResponse(control_fd, &response);
+    // Receive server response
+    char* response = malloc(MAX_CONTROL_SIZE + 1);
+    if (response == NULL){
+        fprintf(stderr, "ERROR: Memory allocation failed\n");
+        return -1;
+    }
+    int code;
+    int bytesRead = serverResponse(control_fd, response, &code);
     if (bytesRead == -1 || response == NULL){
-        response ? NULL : free(response);
+        free(response);
         closeConnection(control_fd);
         return -1;
     }
     printf("Server: %s\n", response);
 
     // Check code (221)
-    if (strncmp(response, SERVER_QUIT, CODE_SIZE) != 0){
+    if (code != SERVER_QUIT){
         fprintf(stderr,"ERROR: Server code not expected\n");
         free(response);
         closeConnection(control_fd);

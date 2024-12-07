@@ -31,15 +31,19 @@ int main(int argc, char **argv){
     printf("Typecode: %c\n\n", ftpParams.typecode);
 
     printf("CONNECTION CLIENT-SERVER\n");
+
     // Login
-    if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.port) == -1){
+    if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.hostname, ftpParams.port) == -1){
         fprintf(stderr,"ERROR: Login failed.\n");
-        return EXIT_FAILURE;
+        return -1;
     };
 
     // Download
-
+    
     // Logout
-    logout();
-    return EXIT_SUCCESS;
+    if (logout() == -1){
+        fprintf(stderr,"ERROR: Logout failed.\n");
+        return -1;
+    }
+    return 0;
 }

@@ -1,8 +1,5 @@
 #include "dns.h"
 
-#define h_addr h_addr_list[0]
-#define IPV4   AF_INET
-
 char* reverseDnsLookup(const char* ip){
     if (ip == NULL){
         return NULL;
