@@ -22,7 +22,6 @@ int createConnection(char* ip, int port){
         closeConnection(fd);
         return -1;
     }
-    printf("Client: Connection open on %s\n",ip);
 
     return fd;
 }
@@ -38,7 +37,7 @@ int closeConnection(int fd){
 }
 
 
-int serverResponse(int fd, char* response, int* code) {
+int serverControlResponse(int fd, char* response, int* code) {
     if (response == NULL || code == NULL){
         fprintf(stderr, "ERROR: NULL parameters\n");
         return -1;
@@ -48,6 +47,8 @@ int serverResponse(int fd, char* response, int* code) {
     int digitsRead = 0;
     int state = STATE_WAIT_CODE;
     *code = 0;
+    memset(response, 0, MAX_CONTROL_SIZE + 1);
+    
 
     // Machine state for reading
     char byte;
@@ -126,17 +127,13 @@ int login(char *username, char *password, char* ip, char* host, int port){
     if (control_fd == -1){
         return -1;
     }
+    printf("Client: Connection open on ip:%s, hostname:%s, port:%d\n",ip,host,port);
 
     // Receive server response
-    char* response = malloc(MAX_CONTROL_SIZE + 1);
-    if (response == NULL){
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
-        return -1;
-    }
+    char response[MAX_CONTROL_SIZE + 1];
     int code;
-    int bytesRead = serverResponse(control_fd, response, &code);
+    int bytesRead = serverControlResponse(control_fd, response, &code);
     if (bytesRead == -1){
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
@@ -145,11 +142,9 @@ int login(char *username, char *password, char* ip, char* host, int port){
     // Check code (220)
     if (code != SERVER_READY){
         fprintf(stderr,"ERROR: Server code not expected\n");
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
-    free(response);
 
     // Credentials
     // Build (USER) command
@@ -165,15 +160,9 @@ int login(char *username, char *password, char* ip, char* host, int port){
     }
     printf("Client: %s", commandUser);
 
-    response = malloc(MAX_CONTROL_SIZE + 1);
-    if (response == NULL){
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
-        return -1;
-    }
     // Receive server response
-    bytesRead = serverResponse(control_fd, response, &code);
+    bytesRead = serverControlResponse(control_fd, response, &code);
     if (bytesRead == -1 || response == NULL){
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
@@ -182,11 +171,9 @@ int login(char *username, char *password, char* ip, char* host, int port){
     // Check code (331)
     if (code != SERVER_SPECIFY_PASSWORD){
         fprintf(stderr,"ERROR: Server code not expected\n");
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
-    free(response);
 
     // Build (PASS) command
     commandLength = strlen(COMMAND_PASS) + strlen(password) + 3;
@@ -201,15 +188,9 @@ int login(char *username, char *password, char* ip, char* host, int port){
     }
     printf("Client: %s", commandPass);
 
-    response = malloc(MAX_CONTROL_SIZE + 1);
-    if (response == NULL){
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
-        return -1;
-    }
     // Receive server response
-    bytesRead = serverResponse(control_fd, response, &code);
+    bytesRead = serverControlResponse(control_fd, response, &code);
     if (bytesRead == -1 || response == NULL){
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
@@ -218,11 +199,9 @@ int login(char *username, char *password, char* ip, char* host, int port){
     // Check code (230)
     if (code != SERVER_LOGGED_IN) {
         fprintf(stderr,"ERROR: Server code not expected\n");
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
-    free(response);
     
     return 0;
 }
@@ -250,15 +229,10 @@ int logout(){
     printf("Client: %s", COMMAND_QUIT);
 
     // Receive server response
-    char* response = malloc(MAX_CONTROL_SIZE + 1);
-    if (response == NULL){
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
-        return -1;
-    }
+    char response[MAX_CONTROL_SIZE + 1];
     int code;
-    int bytesRead = serverResponse(control_fd, response, &code);
+    int bytesRead = serverControlResponse(control_fd, response, &code);
     if (bytesRead == -1 || response == NULL){
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
@@ -267,11 +241,9 @@ int logout(){
     // Check code (221)
     if (code != SERVER_QUIT){
         fprintf(stderr,"ERROR: Server code not expected\n");
-        free(response);
         closeConnection(control_fd);
         return -1;
     }
-    free(response);
 
     return closeConnection(control_fd);
 }

@@ -51,13 +51,13 @@ int createConnection(char* ip, int port);
 int closeConnection(int fd);
 
 /**
- * @brief Read server responses
+ * @brief Read server control responses
  * @param fd - File descriptor
  * @param response - Server response
  * @param code - Server response code
- * @return - 0 on success, -1 on failure
+ * @return - Total bytes read on success, -1 on failure
  */
-int serverResponse(int fd, char* response, int* code);
+int serverControlResponse(int fd, char* response, int* code);
 
 /**
  * @brief Login user account

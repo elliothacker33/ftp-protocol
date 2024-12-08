@@ -143,7 +143,6 @@ As tramas são as unidades de transmissão de dados na camada de enlace. A parti
 ![tramaSize](img/trsize.png)
 
 #### O que é a loopback interface, e porque é importante?
-
 A inteface de loopback é uma interface de rede virtual, que serve para testar o funcionamento da stack de protocolos TCP/IP no próprio computador. O ip. **O ip da interface de loopback é 127.0.0.1/8**. 
 
 

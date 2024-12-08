@@ -15,7 +15,7 @@ int main(int argc, char **argv){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
         return EXIT_FAILURE;
     }
-    printf("URL PARSER RESULTS\n");
+    printf("URL PARSER RESULTS\n\n");
     // Pararameters
     printf("Username: %s\n", ftpParams.username);
     printf("Password: %s\n", ftpParams.password);
@@ -30,7 +30,7 @@ int main(int argc, char **argv){
     printf("Filename: %s\n", ftpParams.filename);
     printf("Typecode: %c\n\n", ftpParams.typecode);
 
-    printf("CONNECTION CLIENT-SERVER\n");
+    printf("CONNECTION CLIENT-SERVER\n\n");
 
     // Login
     if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.hostname, ftpParams.port) == -1){
