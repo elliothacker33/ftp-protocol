@@ -6,14 +6,14 @@ int main(int argc, char **argv){
     if (argc != 2){
         fprintf(stderr,"ERROR: Incorrect command line arguments.\n");
         printf("Example: download ftp://[<user>:<password>@]<host>/<url-path>\n");
-        exit(-1);
+        return -1;
     }
     
     FTP_Parameters ftpParams;
     memset(&ftpParams, 0, sizeof(FTP_Parameters));
     if (ftpUrlParser(argv[1], &ftpParams) != 0){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
-        return EXIT_FAILURE;
+        return -1;
     }
     printf("URL PARSER RESULTS\n\n");
     // Pararameters
