@@ -2,6 +2,11 @@
 
 int createConnection(char* ip, int port){
 
+    if (ip == NULL){
+        fprintf(stderr, "ERROR: NULL parameters\n");
+        return -1;
+    }
+
     // Socket settings
     struct sockaddr_in server_addr;
     bzero((char*)&server_addr, sizeof(server_addr));
@@ -120,7 +125,12 @@ int serverControlResponse(int fd, char* response, int* code) {
 
 
 // Login
-int login(char *username, char *password, char* ip, char* host, int port){
+int login(char* username, char* password, char* ip, char* host, int port){
+
+    if (username == NULL || password == NULL || ip == NULL || host == NULL){
+        fprintf(stderr, "ERROR: NULL parameters\n");
+        return -1;
+    }
 
     // Open connection
     control_fd = createConnection(ip,port);
@@ -162,7 +172,7 @@ int login(char *username, char *password, char* ip, char* host, int port){
 
     // Receive server response
     bytesRead = serverControlResponse(control_fd, response, &code);
-    if (bytesRead == -1 || response == NULL){
+    if (bytesRead == -1){
         closeConnection(control_fd);
         return -1;
     }
@@ -190,7 +200,7 @@ int login(char *username, char *password, char* ip, char* host, int port){
 
     // Receive server response
     bytesRead = serverControlResponse(control_fd, response, &code);
-    if (bytesRead == -1 || response == NULL){
+    if (bytesRead == -1){
         closeConnection(control_fd);
         return -1;
     }
@@ -232,7 +242,7 @@ int logout(){
     char response[MAX_CONTROL_SIZE + 1];
     int code;
     int bytesRead = serverControlResponse(control_fd, response, &code);
-    if (bytesRead == -1 || response == NULL){
+    if (bytesRead == -1){
         closeConnection(control_fd);
         return -1;
     }
