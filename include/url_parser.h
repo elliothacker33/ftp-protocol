@@ -1,27 +1,32 @@
-
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
+// Includes
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+
+// Modules
 #include "dns.h"
+
+// Url settings
 #define URL_FIELD_MAX_LENGTH 255
 #define URL_MAX_CWD 20
-
 #define FTP_DEFAULT_PORT 21
 #define FTP_DEFAULT_TYPE_CODE "i"
 #define FTP_PREFIX_SIZE 6
 #define FTP_MAX_PORT 65535
 #define URL_MAX_PORT_LENGTH 15
 
+// Anonymous account
 #define USER_ANONYMOUS "anonymous"
-#define PASS_ANONYMOUS "upXXXXXXXXX@edu.fe.up.pt" // Email address (optional)
+#define PASS_ANONYMOUS "upXXXXXXXXX@edu.fe.up.pt" // Email address or "anonymous"
 
-
-
+/**
+ * @struct Parameters for a ftp connection
+ */
 typedef struct {
     char username[URL_FIELD_MAX_LENGTH + 1];
     char password[URL_FIELD_MAX_LENGTH + 1];
@@ -32,7 +37,6 @@ typedef struct {
     char typecode;
     int port;
 } FTP_Parameters;
-
 
 /**
  * @brief This function decodes percent-encoded characters in the given url parameter.

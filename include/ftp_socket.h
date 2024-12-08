@@ -1,3 +1,7 @@
+#ifndef _FTP_SOCKET_H_
+#define _FTP_SOCKET_H_
+
+// Includes
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -11,19 +15,24 @@
 // Connection settings
 #define IPV4 AF_INET
 #define CONNECTION_TYPE SOCK_STREAM
-// Server code
+
+// Server code settings
 #define CODE_SIZE 3
 #define MAX_CONTROL_SIZE 1024
 #define SERVER_READY 220
 #define SERVER_SPECIFY_PASSWORD 331
 #define SERVER_LOGGED_IN 230
 #define SERVER_QUIT 221
+
 // Commands
 #define COMMAND_USER "USER"
 #define COMMAND_PASS "PASS"
 #define COMMAND_QUIT "QUIT\r\n"
 
 // States
+/**
+ * @enum State - States for reading control responses from the server
+ */
 typedef enum {
     STATE_WAIT_CODE,
     STATE_WAIT_SP,
@@ -75,3 +84,5 @@ int login(char *username, char *password, char* ip, char* host, int port);
  * @return 0 on success, -1 on failure
  */
 int logout();
+
+#endif // _FTP_SOCKET_H_

@@ -1,6 +1,7 @@
+#ifndef _FTP_CLIENT_H_
+#define _FTP_CLIENT_H_
 
-#ifndef _FTP_H_
-#define _FTP_H_
+// Modules
 #include "url_parser.h"
 #include "ftp_socket.h"
 #include "dns.h"
@@ -10,4 +11,4 @@
  */
 int main(int argc, char **argv);
 
-#endif // _FTP_H_
+#endif // _FTP_CLIENT_H_

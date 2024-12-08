@@ -1,6 +1,7 @@
 #ifndef _DNS_H_
 #define _DNS_H_
 
+// Includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +9,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+// Connection settings
 #define h_addr h_addr_list[0]
 #define IPV4   AF_INET
 

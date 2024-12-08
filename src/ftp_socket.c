@@ -2,7 +2,7 @@
 
 int createConnection(char* ip, int port){
 
-    if (ip == NULL){
+    if (!ip){
         fprintf(stderr, "ERROR: NULL parameters\n");
         return -1;
     }
@@ -37,13 +37,13 @@ int closeConnection(int fd){
     if (close(fd) == -1){
         fprintf(stderr, "ERROR: Socket closing failed\n");
         return -1;
-    };
+    }
     return 0;
 }
 
 
 int serverControlResponse(int fd, char* response, int* code) {
-    if (response == NULL || code == NULL){
+    if (!response || !code){
         fprintf(stderr, "ERROR: NULL parameters\n");
         return -1;
     }
@@ -58,6 +58,7 @@ int serverControlResponse(int fd, char* response, int* code) {
     // Machine state for reading
     char byte;
     while (state != STATE_STOP) {
+        
         // Read a byte
         int bytesRead = read(fd, &byte, 1);
         if (bytesRead != 1) {
@@ -127,7 +128,7 @@ int serverControlResponse(int fd, char* response, int* code) {
 // Login
 int login(char* username, char* password, char* ip, char* host, int port){
 
-    if (username == NULL || password == NULL || ip == NULL || host == NULL){
+    if (!username || !password || !ip || !host){
         fprintf(stderr, "ERROR: NULL parameters\n");
         return -1;
     }

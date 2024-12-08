@@ -36,7 +36,7 @@ int main(int argc, char **argv){
     if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.hostname, ftpParams.port) == -1){
         fprintf(stderr,"ERROR: Login failed.\n");
         return -1;
-    };
+    }
 
     // Download
     
