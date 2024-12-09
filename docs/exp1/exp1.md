@@ -40,7 +40,7 @@ O computador escolhido para correr o GTKterminal foi o **tux3**.
 |----------|----------|
 | gnu13-e1 | 3        |
 | gnu14-e1 | 4        |
-| gtk13-s0 | 0 |
+| gtk13-s0 | 0        |
 
 **3** - Configurar ip dos hosts nas interfaces de rede e verificar que os ip's foram bem configurados.
 
@@ -140,10 +140,9 @@ As tramas ethernet recebidas no wireshark têm sempre um protocolo associado (AR
 
 #### Como determinar o tamanho de uma trama?
 As tramas são as unidades de transmissão de dados na camada de enlace. A partir do wireshark é possivel determinar o tamanho de qualquer frame.
+**Exemplo** - Tamanho de um pacote ICMP
 ![tramaSize](img/trsize.png)
 
 #### O que é a loopback interface, e porque é importante?
 A inteface de loopback é uma interface de rede virtual, que serve para testar o funcionamento da stack de protocolos TCP/IP no próprio computador. O ip. **O ip da interface de loopback é 127.0.0.1/8**. 
-
-
 ### Análise dos logs

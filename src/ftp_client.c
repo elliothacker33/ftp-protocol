@@ -39,7 +39,7 @@ int main(int argc, char **argv){
     }
 
     // Download
-    
+
     // Logout
     if (logout() == -1){
         fprintf(stderr,"ERROR: Logout failed.\n");

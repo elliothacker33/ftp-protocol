@@ -34,7 +34,7 @@ typedef struct {
     char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1];
     char filename[URL_FIELD_MAX_LENGTH + 1];
     char ip[URL_FIELD_MAX_LENGTH + 1]; 
-    char typecode;
+    char typecode; // I - Image (binary) A - Ascii
     int port;
 } FTP_Parameters;
 

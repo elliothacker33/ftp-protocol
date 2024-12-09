@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/select.h>
 #include <math.h>
 
 // Connection settings
@@ -19,11 +20,21 @@
 // Server code settings
 #define CODE_SIZE 3
 #define MAX_CONTROL_SIZE 1024
+#define SERVER_WAIT_N 120
+#define SERVER_COMMAND_NOT_IMPLEMENTED 202
 #define SERVER_READY 220
-#define SERVER_SPECIFY_PASSWORD 331
-#define SERVER_LOGGED_IN 230
 #define SERVER_QUIT 221
-
+#define SERVER_LOGGED_IN 230
+#define SERVER_SPECIFY_PASSWORD 331
+#define SERVER_NEED_ACCT 332
+#define SERVER_NOT_AVAILABLE 421
+#define SERVER_BAD_COMMAND 500
+#define SERVER_BAD_PARAMETERS 501
+#define SERVER_NOT_LOGGED_IN 530
+// Timeout sockets
+#define MAX_TIMEOUT_TRIES 5
+#define SECONDS 2
+#define MILLISECONDS 0
 // Commands
 #define COMMAND_USER "USER"
 #define COMMAND_PASS "PASS"
@@ -39,11 +50,12 @@ typedef enum {
     STATE_WAIT_CR,
     STATE_WAIT_LF,
     STATE_STOP
-} State;
+} ControlState;
 
-// File descriptor for control and data 
-int control_fd;
-int data_fd;
+typedef enum {
+    STATE_WAIT_DATA,
+    STATE_FULL_FILE_READ,
+} DataState;
 
 /**
  * @brief Open a connection to the server on ip,port.
@@ -53,20 +65,28 @@ int data_fd;
 int createConnection(char* ip, int port);
 
 /**
- * @brief Close the socket
- * @param fd - File descriptor
+ * @brief Close open sockets (data and/or control)
  * @return - 0 on success, -1 on failure
  */
-int closeConnection(int fd);
+int closeConnections();
 
 /**
  * @brief Read server control responses
- * @param fd - File descriptor
  * @param response - Server response
  * @param code - Server response code
- * @return - Total bytes read on success, -1 on failure
+ * @return - 0 on success, -1 on failure
  */
-int serverControlResponse(int fd, char* response, int* code);
+int serverResponse(char* response, int* code);
+
+/**
+ * @brief Process response code, (RFC959 codes)
+ * @param code - Server code
+ * @param possibleCodes - List of possible codes for a command
+ * @param command - Command sent to server
+ * @param response - Server response
+ * @return - 0 on success, 1 (password feature), -1 on failure
+ */
+int processServerCode(int code, int* possibleCodes, char* command, char* response);
 
 /**
  * @brief Login user account

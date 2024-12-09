@@ -69,8 +69,8 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
     if (posArr){
 
         char* posColon = strchr(url, ':');
-        int usernameLength;
-        int passwordLength;
+        int usernameLength, passwordLength;
+
         if (posColon && posColon < posArr){    
             usernameLength = posColon - url;
             passwordLength = posArr - posColon - 1;
@@ -133,8 +133,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
     }
     else{
         // Case 2: ftp://ftp.up.pt......
-        int anonymousUserLength = sizeof(USER_ANONYMOUS);
-        int anonymousPasswordLength = sizeof(PASS_ANONYMOUS);
+        int anonymousUserLength = sizeof(USER_ANONYMOUS), anonymousPasswordLength = sizeof(PASS_ANONYMOUS);
 
         if (anonymousUserLength > 0 && anonymousUserLength <= URL_FIELD_MAX_LENGTH && anonymousPasswordLength > 0 && anonymousPasswordLength <= URL_FIELD_MAX_LENGTH){
             memcpy(parameters->username, USER_ANONYMOUS, anonymousUserLength);
@@ -338,7 +337,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             
             fakeTypeCodeLen = strlen(fakeTypeCode);
         
-            if (fakeTypeCodeLen == 1 && strchr("iIaAdD", fakeTypeCode[0])) {
+            if (fakeTypeCodeLen == 1 && strchr("iIaA", fakeTypeCode[0])) {
                 parameters->typecode = fakeTypeCode[0];
             } else {
                 fprintf(stderr, "ERROR: Invalid typecode format\n");
@@ -346,7 +345,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
         }
         else {
-            if (strlen(FTP_DEFAULT_TYPE_CODE) == 1 && strchr("iIaAdD", FTP_DEFAULT_TYPE_CODE[0])) {
+            if (strlen(FTP_DEFAULT_TYPE_CODE) == 1 && strchr("iIaA", FTP_DEFAULT_TYPE_CODE[0])) {
                 parameters->typecode = FTP_DEFAULT_TYPE_CODE[0];
             } else {
                 fprintf(stderr, "ERROR: Invalid typecode format\n");
