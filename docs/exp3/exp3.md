@@ -5,7 +5,7 @@ A experiência foi realizada na bancada nº8, logo o valor de Y = 8.
 A terceira experiência tem como objetivo principal tornar o tux84 num router.
 
 ## Arquitetura da rede
-**Rede da experiência 3** - A segunda rede configurada nas aulas laboratoriais é composta por três computadores, designados como tux2, tux3 e tux4, e por um switch Mikrotik Router Switch. Estes 3 computadores estarão dividos em duas bridges, bridge80 e bridge81.
+**Rede da experiência 3** - A terceira rede configurada nas aulas laboratoriais é composta por três computadores, designados como tux2, tux3 e tux4, e por um switch Mikrotik Router Switch. Estes 3 computadores estarão dividos em duas bridges, bridge80 e bridge81.
 
 - **IP da subrede 80** - 172.16.80.0/24
 - **IP da subrede 81** - 172.16.81.0/24
