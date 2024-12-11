@@ -14,6 +14,7 @@ A segunda experiência tem como objetivo principal ensinar como usar bridges, qu
 - **IP do tux4** - 172.16.80.254/24
 - **IP broadcast (subrede 80)** - 172.16.80.255/24
 - **IP broadcast (subrede 81)** - 172.16.81.255/24
+
 ![Arquiteura da rede exp2](img/exp2arch.png)
 
 ## Configuração dos cabos
