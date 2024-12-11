@@ -17,6 +17,9 @@ A arquitetura divide-se em duas redes principais:
     - **IP RLAB** - 10.227.10.254/24 (router do laboratório)
     - **IP broadcast** - 10.227.10.255/24
 
+
+    ![Arquiteura da internet](img/internetarch.png)
+
     
  - **Rede da experiência 1** - A primeira rede configurada nas aulas laboratoriais é composta por dois computadores, designados como tux3 e tux4, e por um switch Mikrotik Router Switch.
 
@@ -24,6 +27,8 @@ A arquitetura divide-se em duas redes principais:
     - **IP do tux3** - 172.16.80.1/24
     - **IP do tux4** - 172.16.80.254/24
     - **IP broadcast** - 172.16.80.255/24
+
+    ![Arquiteura da exp1](img/exp1arch.png)
 
 
 ## Configuração dos cabos

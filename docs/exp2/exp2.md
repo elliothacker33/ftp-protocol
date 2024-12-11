@@ -1,5 +1,4 @@
 # Experiência 2 
-**!!!!!!!Fazer primeiro  experiências anteriores (1)**
 A experiência foi realizada na bancada nº8, logo o valor de Y = 8.
 
 ## Objetivo da experiêcia
@@ -15,7 +14,7 @@ A segunda experiência tem como objetivo principal ensinar como usar bridges, qu
 - **IP do tux4** - 172.16.80.254/24
 - **IP broadcast (subrede 80)** - 172.16.80.255/24
 - **IP broadcast (subrede 81)** - 172.16.81.255/24
-![Arquiteura da rede](img/exp2.png)
+![Arquiteura da rede exp2](img/exp2arch.png)
 
 ## Configuração dos cabos
 ### Switch 
@@ -75,7 +74,8 @@ ifconfig # Verificar
 ```
 
 **4** - Ping tux84 e tux82
-**Tux83** (!EM FALTA)
+
+**Tux83** 
 ```bash
     ping 172.16.80.254 # tux83 -> tux84
     ping 172.16.81.1 # tux83 -> tux82
@@ -83,6 +83,7 @@ ifconfig # Verificar
 Verificar os pacotes que tux2 e tux4 recebem (**Wireshark**)
 
 **5** - Ping broadcast da subrede 80
+
 **Tux83**
 ```bash
     ping 172.16.80.255 #tux83 -> broadcast
@@ -90,6 +91,7 @@ Verificar os pacotes que tux2 e tux4 recebem (**Wireshark**)
 Verificar os pacotes que tux2, tux3 e tux4 recebem (**Wireshark**)
 
 **6** - Ping broadcast da subrede 81
+
 **Tux82**
 ```bash
     ping 172.16.81.255 #tux82 -> broadcast

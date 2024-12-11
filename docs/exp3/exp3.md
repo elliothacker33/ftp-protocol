@@ -1,5 +1,4 @@
 # Experiência 3
-**!!!!!!!Fazer primeiro experiências anteriores (1,2)**
 A experiência foi realizada na bancada nº8, logo o valor de Y = 8.
 
 ## Objetivo da experiêcia
@@ -16,6 +15,8 @@ A terceira experiência tem como objetivo principal tornar o tux84 num router.
 - **IP do tux4 (eth2)** - 172.16.81.253/24
 - **IP broadcast (subrede 80)** - 172.16.80.255/24
 - **IP broadcast (subrede 81)** - 172.16.81.255/24
+
+![Arquiteura da rede exp3](img/exp3arch.png)
 
 
 ## Configuração dos cabos
