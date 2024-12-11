@@ -32,18 +32,29 @@ int createConnection(char* ip, int port){
 }
 
 int closeConnections(){
-
+    // Close control socket
     if (controlFd != -1 && close(controlFd) == -1){
         fprintf(stderr, "ERROR: Closing control socket\n");
         return -1;
     }
-
+    // Close data socket
     if (dataFd != -1 && close(dataFd) == -1){
         fprintf(stderr, "ERROR: Closing data socket\n");
         return -1;
     }
 
     controlFd = -1;
+    dataFd = -1;
+    return 0;
+}
+
+int closeDataConnection(){
+    // Close data socket
+    if (dataFd != -1 && close(dataFd) == -1){
+        fprintf(stderr, "ERROR: Closing data socket\n");
+        return -1;
+    }
+
     dataFd = -1;
     return 0;
 }
@@ -134,7 +145,8 @@ int serverResponse(char *responseControl, int *code) {
             }
 
             if (dataFd != -1 && FD_ISSET(dataFd, &readFdSet) && stateD != STATE_FULL_FILE_READ) {
-                // TODO: data 
+                // Data reading (Read until 0 bytes received (server closed connection))
+                // If 0 bytes received STATE_DATA_CLOSED_CONNECTION
             }
         }
         else{
@@ -167,6 +179,7 @@ int processServerCode(int code, int* possibleCodes, char* command, char* respons
                 }
                 case SERVER_COMMAND_NOT_IMPLEMENTED:
                     printf("Client: Command -> %s, not implemented on this server\n", command);
+                    printf("Help: Type 'FEAT' and 'HELP' to see all available commands"); 
                     closeConnections(); 
                     return -1;
                 case SERVER_READY:
@@ -306,7 +319,8 @@ int login(char* username, char* password, char* ip, char* host, int port){
 // FTP server - Get file size (SIZE)
 // FTP server - PASV
 // FTP server - Download file (RETR)
-//int download(){}
+
+
 
 // Logout
 int logout(){
