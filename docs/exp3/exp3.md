@@ -84,12 +84,12 @@ sysctl net.ipv4.icmp_echo_ignore_broadcasts=0 # (C)
 
 **tux82**
 ```bash 
-route add -net 172.16.80.0 gw 172.16.81.253 # (C)
+route add -net 172.16.80.0/24 gw 172.16.81.253 # (C)
 route -n # Verificar
 ```
 **tux83**
 ```bash 
-route add -net 172.16.81.0 gw 172.16.80.254 # (C)
+route add -net 172.16.81.0/24 gw 172.16.80.254 # (C)
 route -n # Verificar
 ```
 
