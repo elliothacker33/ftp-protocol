@@ -345,7 +345,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
         }
         else {
-            if (strlen(FTP_DEFAULT_TYPE_CODE) == 1 && strchr("iIaA", FTP_DEFAULT_TYPE_CODE[0])) {
+            if (strlen(FTP_DEFAULT_TYPE_CODE) == 1 && strchr("iIaAdD", FTP_DEFAULT_TYPE_CODE[0])) {
                 parameters->typecode = FTP_DEFAULT_TYPE_CODE[0];
             } else {
                 fprintf(stderr, "ERROR: Invalid typecode format\n");
