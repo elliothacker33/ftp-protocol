@@ -1,4 +1,4 @@
-# Experiência 3
+# Experiência 4
 A experiência foi realizada na bancada nº8, logo o valor de Y = 8.
 
 ## Objetivo da experiêcia
@@ -28,7 +28,7 @@ A quarta experiência tem como objetivo principal configurar um router comercial
 | gnu12-e1 | 2        |
 | gnu13-e1 | 3        |
 | gnu14-e1 | 4        |
-| gnu14-e2 | 5        |
+| gnu14-e2 | 11        |
 | router (eth2) | 6   |
 
 
@@ -48,75 +48,98 @@ router(eth1) -> P1.12
 
 ### Experiência 3
 
-**1** - Configurar IP's
+**1** - Ligar router (porta 6) na bridge81 e adicionar ip's do router
 
-**Tux84** 
+**Tux83** 
 ```bash
-ifconfig eth2 up # (C) Ativar interface de rede
-ifconfig eth2 172.16.81.253/24 # (C) Tux84
-ifconfig # Verificar
-```
-
-**2** - Verificar endereços MAC e endereços IP (ifconfig)
-| tux | MAC | IP |
-|----------|----------| -------- |
-| tux84-eth1 | 00:c0:df:04:a2:6d | 172.16.80.254/24 |
-| tux84-eth2 | 00:c0:df:08:d5:b0 | 172.16.81.253/24 |
-
-
-**3** - Adicionar bridges e portas respetivas de cada tux á sua bridge.
-
-**Tux83 (GTKterminal)**
-```bash
-
 # Remove bridges antigas (C)
-/interface bridge port remove [find interface =ether5] # Tux 84
+/interface bridge port remove [find interface =ether6] # Tux 84
 # Adicionar bridges novas (C)
-/interface bridge port add bridge=bridge81 interface=ether5 #Tux 84
+/interface bridge port add bridge=bridge81 interface=ether6 #Tux 84
 ## Verificar
 /interface bridge print
 /interface bridge port print
 /interface bridge port print brief
+# Adicionar ip's
+/ip address add address=172.16.1.81/24 interface=ether1
+/ip address add address=172.16.81.254/24 interface=ether2
 ```
 
-**4** - Ativar IP-forwarding e desativar ICMP-echo-broadcast
+**2** - Verificar e adicionar rotas em falta.
 
-**Tux84**
-```bash 
-sysctl net.ipv4.ip_forward=1 # (C)
-sysctl net.ipv4.icmp_echo_ignore_broadcasts=0 # (C)
-```
-**5** - Adicionar rotas no tux83 e no tux82
-
-**tux82**
-```bash 
-route add -net 172.16.80.0 gw 172.16.81.253 # (C)
+**Tux82**
+```bash
+route add -net 172.16.1.0/24 gw 172.16.81.254 # (C)
 route -n # Verificar
 ```
-**tux83**
-```bash 
-route add -net 172.16.81.0 gw 172.16.80.254 # (C)
-route -n # Verificar
-```
-
-**6** - Ping a todas as interfaces de rede
 
 **Tux83**
 ```bash
-    ping 172.16.80.254 # tux83 -> tux84.eth1
-    ping 172.16.81.253 # tux83 -> tux84.eth2
-    ping 172.16.81.1 # tux83 -> tux82
+route add -net 172.16.1.0/24 gw 172.16.80.254 # (C)
+route -n # Verificar
 ```
-Verificar os pacotes que tux3 (**Wireshark**)
 
-**7** - Limpar todas as tabelas arp de todos os tuxes
-
-**8** -  Ping tux2
-
-**tux83**
-
+**Tux84**
 ```bash
-    ping 172.16.81.1 # tux83 -> tux82
+route add -net 172.16.1.0/24 gw 172.16.81.254 # (C)
+route -n # Verificar
 ```
 
-Verificar os pacotes que tux4.eth1 e tux4.eth2 recebem (**Wireshark**)
+**router (Tux83 GTKterminal)**
+```bash
+/ip route add dst-address=172.16.80.0/24 gateway=172.16.81.253 # (C)
+/ip route print # Verificar
+```
+
+
+**3** - Ping a todas as interfaces de rede
+
+**Tux83**
+```bash
+    ping 172.16.80.254 # tux3 -> tux4.eth1
+    ping 172.16.81.253 # tux3 -> tux4.eth2
+    ping 172.16.81.1 # tux3 -> tux2
+    ping 172.16.81.254 # tux3 -> router.eth2
+    ping 172.16.1.81 # tux3 -> router.eth1
+```
+**4** - Mudar redirects no tux82
+
+**Tux82**
+```bash
+sysctl net.ipv4.conf.eth1.accept_redirects=0
+sysctl net.ipv4.conf.all.accept_redirects=0
+```
+
+**5** - Rotas tux82
+**Tux82**
+```bash
+sudo route del -net 172.16.80.0 netmask 255.255.255.0 gw 172.16.81.253 dev eth1
+route add -net 172.16.80.0/24 gw 172.16.81.254
+```
+**6** - Ping tux83 e traceroute
+```bash
+ping 172.16.80.0 # tux82 -> tux83 (vai pelo router comercial)
+traceroute 172.16.80.0
+```
+```bash
+sudo route del -net 172.16.80.0 netmask 255.255.255.0 gw 172.16.81.254 dev eth1
+route add -net 172.16.80.0/24 gw 172.16.81.253
+traceroute 172.16.80.0
+
+sudo route del -net 172.16.80.0 netmask 255.255.255.0 gw 172.16.81.253 dev eth1
+sysctl net.ipv4.conf.eth1.accept_redirects=1
+sysctl net.ipv4.conf.all.accept_redirects=1
+traceroute 172.16.80.1 # Default 10.227.20.254 
+```
+**7** - Ping servidor ftp sem/com nat
+**tux83**
+```bash
+ ping 172.16.1.10
+```
+Desativar Nat
+```bash
+ /ip firewall nat disable 0
+ ping 172.16.1.10
+ /ip firewall nat enable 0
+
+```

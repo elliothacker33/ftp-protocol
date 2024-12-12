@@ -26,7 +26,7 @@ A terceira experiência tem como objetivo principal tornar o tux84 num router.
 | gnu12-e1 | 2        |
 | gnu13-e1 | 3        |
 | gnu14-e1 | 4        |
-| gnu14-e2 | 5        |
+| gnu14-e2 | 11        |
 
 
 ### Consola
@@ -64,9 +64,9 @@ ifconfig # Verificar
 ```bash
 
 # Remove bridges antigas (C)
-/interface bridge port remove [find interface =ether5] # Tux 84
+/interface bridge port remove [find interface =ether11] # Tux 84
 # Adicionar bridges novas (C)
-/interface bridge port add bridge=bridge81 interface=ether5 #Tux 84
+/interface bridge port add bridge=bridge81 interface=ether11 #Tux 84
 ## Verificar
 /interface bridge print
 /interface bridge port print
@@ -84,12 +84,12 @@ sysctl net.ipv4.icmp_echo_ignore_broadcasts=0 # (C)
 
 **tux82**
 ```bash 
-route add -net 172.16.80.0 gw 172.16.81.253 # (C)
+route add -net 172.16.80.0/24 gw 172.16.81.253 # (C)
 route -n # Verificar
 ```
 **tux83**
 ```bash 
-route add -net 172.16.81.0 gw 172.16.80.254 # (C)
+route add -net 172.16.81.0/24 gw 172.16.80.254 # (C)
 route -n # Verificar
 ```
 
