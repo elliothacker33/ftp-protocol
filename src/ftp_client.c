@@ -6,14 +6,14 @@ int main(int argc, char **argv){
     if (argc != 2){
         fprintf(stderr,"ERROR: Incorrect command line arguments.\n");
         printf("Example: download ftp://[<user>:<password>@]<host>/<url-path>\n");
-        return -1;
+        return ERROR_COMMAND_LINE_ARGS;
     }
     
     FTP_Parameters ftpParams;
     memset(&ftpParams, 0, sizeof(FTP_Parameters));
-    if (ftpUrlParser(argv[1], &ftpParams) != 0){
+    if (ftpUrlParser(argv[1], &ftpParams) != SUCCESS){
         fprintf(stderr,"ERROR: Invalid ftp URL.\n");
-        return -1;
+        return ERROR_INVALID_URL;
     }
     printf("URL PARSER RESULTS\n\n");
     // Pararameters
@@ -33,17 +33,22 @@ int main(int argc, char **argv){
     printf("CONNECTION CLIENT-SERVER\n\n");
 
     // Login
-    if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.hostname, ftpParams.port) == -1){
+    if (login(ftpParams.username, ftpParams.password, ftpParams.ip, ftpParams.hostname, ftpParams.port) != SUCCESS){
         fprintf(stderr,"ERROR: Login failed.\n");
-        return -1;
+        return ERROR_LOGIN_FAILED;
     }
-
+    
     // Download
-
-    // Logout
-    if (logout() == -1){
-        fprintf(stderr,"ERROR: Logout failed.\n");
-        return -1;
+    if (download(ftpParams.directories, ftpParams.filename, ftpParams.typecode) != SUCCESS){
+        fprintf(stderr,"ERROR: Download failed.\n");
+        return ERROR_DOWNLOAD_FAILED;
     }
-    return 0;
+    
+    // Logout
+    if (logout() != SUCCESS){
+        fprintf(stderr,"ERROR: Logout failed.\n");
+        return ERROR_LOGOUT_FAILED;
+    }
+
+    return SUCCESS;
 }
