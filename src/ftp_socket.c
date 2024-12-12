@@ -692,7 +692,7 @@ int downloadFile(const char* filename, const char* localPath) {
     if (fclose(localFd) != SUCCESS){
         return ERROR_CLOSE_FILE;
     }
-    printf("File downloaded successfully: %s/%s\n\n", localPath, filename);
+    printf("File downloaded successfully: %s\n\n", localPath, filename);
 
     return SUCCESS;
 
