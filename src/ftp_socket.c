@@ -6,12 +6,7 @@ int controlFd = -1;
 int dataFd = -1;
 FILE* localFd;
 
-int createConnection(char* ip, int port){
-
-    if (!ip){
-        fprintf(stderr, "ERROR: NULL parameters\n");
-        return -1;
-    }
+int createConnection(const char* ip, const int port){
 
     struct sockaddr_in server_addr;
     bzero((char*)&server_addr, sizeof(server_addr));
@@ -22,49 +17,45 @@ int createConnection(char* ip, int port){
     int fd = socket(IPV4, CONNECTION_TYPE, 0);
     if (fd < 0){
         fprintf(stderr, "ERROR: Socket creation failed\n");
-        return -1;
+        return ERROR_SOCKET_CREATION_FAILED;
     }
 
     if (connect(fd, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
         fprintf(stderr, "ERROR: Connection failed\n");
-        return -1;
+        return ERROR_CONNECTION_SERVER_FAILED;
     }
 
     return fd;
 }
 
-int closeConnections(){
+int closeConnection(int fd){
 
-    if (controlFd != -1 && close(controlFd) == -1){
+    if (fd != -1 && close(fd) == -1){
         fprintf(stderr, "ERROR: Closing control socket\n");
-        return -1;
+        return ERROR_CLOSING_SOCKET;
     }
 
-    if (dataFd != -1 && close(dataFd) == -1){
-        fprintf(stderr, "ERROR: Closing data socket\n");
-        return -1;
-    }
-
-    controlFd = -1;
-    dataFd = -1;
-    return 0;
+    fd = -1;
+    return SUCCESS;
 }
 
 
 int serverResponse(char *responseControl, int *code) {
-    if (!responseControl || !code || (controlFd == -1 && dataFd == -1)) {
-        fprintf(stderr, "ERROR: Invalid input parameters\n");
-        return -1;
-    }
 
-    int totalBytes = 0, digitsRead = 0, maxFd;
+    // Read byte
+    char byte;
+
+    // States
     ControlState stateC = STATE_WAIT_CODE;
     DataState stateD = STATE_WAIT_DATA;
 
+    // Code and response
+    int totalBytes = 0, digitsRead = 0;
     *code = 0;
-    char byte;
     memset(responseControl, 0, MAX_CONTROL_SIZE + 1);
 
+    // Select 
+    int maxFd;
     fd_set readFdSet;
     struct timeval timeout;
     timeout.tv_sec = SECONDS;
@@ -72,22 +63,31 @@ int serverResponse(char *responseControl, int *code) {
     int tries = 0;
 
     while ((stateC != STATE_STOP && controlFd != -1) || (stateD != STATE_FULL_FILE_READ && dataFd != -1)) {
+        // Sets 
         FD_ZERO(&readFdSet);
-        if (controlFd != -1) FD_SET(controlFd, &readFdSet);
-        if (dataFd != -1) FD_SET(dataFd, &readFdSet);
-        maxFd = (controlFd > dataFd) ? controlFd : dataFd;
 
+        // Add controlFd to set
+        if (controlFd != -1){
+            FD_SET(controlFd, &readFdSet);
+        }
+        // Add dataFd to set
+        if (dataFd != -1){
+            FD_SET(dataFd, &readFdSet);
+        }
+        // Wait for data
+        maxFd = (controlFd > dataFd) ? controlFd : dataFd;
         int ready = select(maxFd + 1, &readFdSet, NULL, NULL, &timeout);
 
         if (ready != -1) {
             tries = 0; // Reset tries
 
+            // Read from control file descriptor
             if (controlFd != -1 && FD_ISSET(controlFd, &readFdSet) && stateC != STATE_STOP) {
                 int bytesRead = read(controlFd, &byte, 1);
                 if (bytesRead > 0) {
                     if (totalBytes >= MAX_CONTROL_SIZE) {
-                        fprintf(stderr, "ERROR: Response too large\n");
-                        return -1;
+                        fprintf(stderr, "ERROR: Response exceeded max size\n");
+                        return ERROR_EXCEEDED_MAX_SIZE;
                     }
                     responseControl[totalBytes++] = byte;
 
@@ -96,7 +96,9 @@ int serverResponse(char *responseControl, int *code) {
                             if (isdigit(byte)) {
                                 digitsRead++;
                                 *code = *code * 10 + (byte - '0');
-                                if (digitsRead == 3) stateC = STATE_WAIT_SP;
+                                if (digitsRead == 3){
+                                    stateC = STATE_WAIT_SP;
+                                }
                             } else {
                                 digitsRead = 0;
                                 *code = 0;
@@ -126,43 +128,42 @@ int serverResponse(char *responseControl, int *code) {
                     }
                 } else if (bytesRead == 0) {
                     fprintf(stderr, "ERROR: Server closed connection\n");
-                    return -1;
+                    return ERROR_SERVER_CLOSED_CONNECTION;
                 } else {
-                    fprintf(stderr, "ERROR: Read failed\n");
-                    return -1;
+                    fprintf(stderr, "ERROR: Reading from data connection\n");
+                    return ERROR_READ_SOCKET_FAILED;
                 }
             }
-
+            
+            // Read from data file descriptor
             if (dataFd != -1 && FD_ISSET(dataFd, &readFdSet) && stateD != STATE_FULL_FILE_READ) {
                 int bytesRead = read(dataFd, &byte, 1);
                 if (bytesRead > 0) {
                     // Handle data read from dataFd
                     if (fwrite(&byte, 1, bytesRead, localFd) != bytesRead) {
                         fprintf(stderr, "ERROR: Writing to local file\n");
-                        fclose(localFd);
-                        closeConnections();
-                        return -1;
+                        return ERROR_WRITE_FILE_FAILED;
                     }
                 } else if (bytesRead == 0) {
                     stateD = STATE_FULL_FILE_READ;
                 } else {
                     fprintf(stderr, "ERROR: Reading from data connection\n");
-                    return -1;
+                    return ERROR_READ_SOCKET_FAILED;
                 }
             }
         } else {
             tries++;
             if (tries >= MAX_TIMEOUT_TRIES) {
                 fprintf(stderr, "ERROR: Server response timeout\n");
-                return -1;
+                return ERROR_MAX_TIMEOUT;
             }
         }
     }
 
-    return 0;
+    return SUCCESS;
 }
 
-int processServerCode(int code, int* possibleCodes, char* command, char* response){
+int processServerCode(const int code, const int* possibleCodes, const char* command, const char* response){
     for(int i = 0; i < sizeof(possibleCodes); i++){
         if (code == possibleCodes[i]){
             switch(code){
@@ -173,8 +174,7 @@ int processServerCode(int code, int* possibleCodes, char* command, char* respons
                         sleep(minutes * 60);
                     } else {
                         fprintf(stderr, "ERROR: Failed to parse wait time from server response\n");
-                        closeConnections();
-                        return -1;
+                        return ERROR_SERVER_CODE;
                     }
                     break;
                 }
@@ -184,14 +184,12 @@ int processServerCode(int code, int* possibleCodes, char* command, char* respons
                 case SERVER_OPENING_DATA_CONNECTION:
                     printf("Client: Opening data connection\n");
                     break;
-                
                 case SERVER_COMMAND_OK:
-                    printf("Client: Command -> %s, successful\n", command);
+                    printf("Client: Command -> %s, successful\n\n", command);
                     break;
                 case SERVER_COMMAND_NOT_IMPLEMENTED_SUPERFLUOUS:
                     printf("Client: Command -> %s, not implemented on this server at superfluous level\n", command);
-                    closeConnections(); 
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_FILE_STATUS:
                     printf("Client: File status -> %s\n", response);
                     break;
@@ -200,7 +198,7 @@ int processServerCode(int code, int* possibleCodes, char* command, char* respons
                     break;
                 case SERVER_QUIT:
                     printf("Client: Server quit\n");
-                    return closeConnections();
+                    break;
                 case SERVER_DATA_CONNECTION_CLOSE:
                     printf("Client: Data connection closed\n");
                     break;
@@ -208,204 +206,217 @@ int processServerCode(int code, int* possibleCodes, char* command, char* respons
                     printf("Client: Entering passive mode\n");
                     break;
                 case SERVER_LOGGED_IN:
-                    printf("Client: Server logged in\n\n");
+                    printf("Client: Server authentication done\n\n");
                     break;
                 case SERVER_FILE_ACTION_OK:
                     printf("Client: File action successful\n");
                     break;
                 case SERVER_SPECIFY_PASSWORD:
                     printf("Client: Server requires password\n\n");
-                    return 1;
+                    return PASSWORD;
                 case SERVER_NOT_AVAILABLE:
                     printf("Client: Server is not available\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_CANNOT_OPEN_DATA_CONNECTION:
                     printf("Client: Cannot open data connection\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED:
                     printf("Client: Data connection closed, transfer aborted\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_REQUESTED_FILE_ACTION_ABORTED:
                     printf("Client: Requested file action aborted\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_REQUESTED_ACTION_ABORTED:
                     printf("Client: Requested action aborted\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_BAD_COMMAND:
                     printf("Client: This command is malformed (command type) -> %s\n",command);
                     printf("Help: See RFC 959 for right command usage\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_BAD_PARAMETERS:
                     printf("Client: This command is malformed (command parameters) -> %s\n",command);
                     printf("Help: See RFC 959 for right command usage\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_COMMAND_NOT_IMPLEMENTED:
                     printf("Client: Command -> %s, is not implemented on this server\n",command);
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_COMMAND_NOT_IMPLEMENTED_FOR_PARAMETER:
                     printf("Client: Command -> %s, is not implemented for this parameter\n",command);
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_NOT_LOGGED_IN:
                     printf("Client: username,password or account name are wrong\n");
                     printf("Help: Change username to anonymous, or to right account.\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
                 case SERVER_FILE_UNAVAILABLE:
                     printf("Client: File is unavailable\n");
-                    closeConnections();
-                    return -1;
+                    return ERROR_SERVER_CODE;
             }
-            return 0;
+            return SUCCESS;
         }
     }
 
     fprintf(stderr,"ERROR: Server code not expected (RFC959 standards)\n");
-    return -1;
+    return ERROR_SERVER_CODE;
 }
 
+int openControlConnection(const char* ip, const char* host, const int port){
 
-// Login
-int login(char* username, char* password, char* ip, char* host, int port){
-    // Connect to server
-    if (!username || !password || !ip || !host){
-        fprintf(stderr, "ERROR: NULL parameters\n");
-        return -1;
-    }
-
-    printf("Client: Trying to establish connection to %s\n", host);
+    printf("Client: Trying to establish connection to %s...\n", host);
     controlFd = createConnection(ip, port);
-    if (controlFd == -1){
-        fprintf(stderr,"ERROR: Cannot establish connection\n");
-        closeConnections();
-        return -1;
+
+    if (controlFd < 0){
+        fprintf(stderr,"ERROR: Cannot establish connection to server\n");
+        return ERROR_CONNECTION_SERVER_FAILED;
     }
 
     char response[MAX_CONTROL_SIZE + 1];
     int code;
+
     int status = serverResponse(response, &code);
-
-    if (status == -1){
+    if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnections();
-        return -1;
+        return ERROR_SERVER_RESPONSE_FAILED;
     }
-
     printf("Server: %s", response);
+
     int possibleCodesConnect[3] = {
         SERVER_WAIT_N,
         SERVER_READY,
-        SERVER_NOT_AVAILABLE};
+        SERVER_NOT_AVAILABLE
+    };
 
-    int result;
-    if ((result = processServerCode(code, possibleCodesConnect, NULL, response)) == -1){
-        return -1;
+    int result = processServerCode(code, possibleCodesConnect, NULL, response);
+    if (result != SUCCESS){
+        return ERROR_SERVER_CODE;
     }
-    printf("Client: Connection open on ip:%s, hostname:%s, port:%d\n\n",ip,host,port);
 
-    // Credentials
-    // User
-    int commandLength = strlen(COMMAND_USER) + strlen(username) + 3;
-    char commandUser[commandLength + 1];
+    printf("Client: Connection open on ip:%s, hostname:%s, port:%d\n\n",ip,host,port);
+    return SUCCESS;
+}
+
+int authenticateCredentials(const char* username, const char* password){
+
+    // (USER)
+    int commandLength = strlen(COMMAND_USER) + strlen(username) + 3; // 3 - SPACE + \r + \n
+    char commandUser[commandLength + 1]; 
     sprintf(commandUser, "%s %s\r\n", COMMAND_USER, username);
 
     int bytesSent = write(controlFd, commandUser, commandLength);
     if (bytesSent != commandLength){
-        fprintf(stderr, "ERROR: Number of bytes sent\n");
-        closeConnections();
-        return -1;
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        return ERROR_WRITE_SOCKET_FAILED;
     }
     printf("Client: %s", commandUser);
 
-    status = serverResponse(response, &code);
-    if (status == -1){
-        fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnections();
-        return -1;
-    }
+    char response[MAX_CONTROL_SIZE + 1];
+    int code;
 
+    int status = serverResponse(response, &code);
+    if (status != SUCCESS){
+        fprintf(stderr, "ERROR: Server response failed\n");
+        return ERROR_SERVER_RESPONSE_FAILED;
+    }
     printf("Server: %s", response);
+
     int possibleCodesUser[6] = {
         SERVER_LOGGED_IN,
         SERVER_NOT_LOGGED_IN,
         SERVER_BAD_COMMAND,
         SERVER_BAD_PARAMETERS,
         SERVER_NOT_AVAILABLE,
-        SERVER_SPECIFY_PASSWORD};
+        SERVER_SPECIFY_PASSWORD
+    };
 
-    if ((result = processServerCode(code, possibleCodesUser, commandUser, response)) == -1){
-        return -1;
+    int result = processServerCode(code, possibleCodesUser, commandUser, response);
+    if (result == SUCCESS){
+        printf("Client: Authentication successful (Only USER authentication)\n");
+        return SUCCESS;
     }
-    else if (result == 1){
-        // Password
+    else if (result == PASSWORD){
+
+        // (PASS)
         commandLength = strlen(COMMAND_PASS) + strlen(password) + 3;
         char commandPass[commandLength + 1];
         sprintf(commandPass, "%s %s\r\n", COMMAND_PASS, password);
 
-        bytesSent = write(controlFd, commandPass, commandLength);
+        int bytesSent = write(controlFd, commandPass, commandLength);
         if (bytesSent != commandLength){
-            fprintf(stderr, "ERROR: Number of bytes sent\n");
-            closeConnections();
-            return -1;
+            fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+            return ERROR_WRITE_SOCKET_FAILED;
         }
         printf("Client: %s", commandPass);
 
         status = serverResponse(response, &code);
-        if (status == -1){
+        if (status != SUCCESS){
             fprintf(stderr, "ERROR: Server response failed\n");
-            closeConnections();
-            return -1;
+            return ERROR_SERVER_RESPONSE_FAILED;
         }
         printf("Server: %s", response);
+
         int possibleCodesPass[7] = {
             SERVER_LOGGED_IN,
             SERVER_COMMAND_NOT_IMPLEMENTED_SUPERFLUOUS,
             SERVER_NOT_LOGGED_IN,
             SERVER_BAD_COMMAND,
             SERVER_BAD_PARAMETERS,
-            503 /* TODO Este código n existe */,
-            SERVER_NOT_AVAILABLE};
-
-        if ((result = processServerCode(code, possibleCodesPass, commandPass, response)) == -1){
-            return -1;
+            SERVER_BAD_SEQUENCE_COMMANDS,
+            SERVER_NOT_AVAILABLE
+        };
+        
+        result = processServerCode(code, possibleCodesPass, commandPass, response);
+        if (result != SUCCESS){
+            return ERROR_SERVER_CODE;
         }
     }
-    return 0;
+    else{
+        return ERROR_SERVER_CODE;
+    }
+
+    return SUCCESS;
+}
+
+// Login
+int login(const char* username, const char* password, const char* ip, const char* host, const int port){
+ 
+      // Connect to server
+    if (openControlConnection(ip, host, port) != SUCCESS){
+        closeConnection(controlFd);
+        return ERROR_OPEN_CONTROL_CONNECTION;
+    };
+
+    // Authenticate (USER,PASS)
+    if (authenticateCredentials(username, password) != SUCCESS){
+        closeConnection(controlFd);
+        return ERROR_AUTHENTICATION_FAILED;
+    }
+
+    return SUCCESS;
 }
 
 
 
-// Download
-// FTP server - Find file (CWD)
-int cwd(char **directories) {
+
+int cwd(char directories[21][256]){
     for (int i = 0; directories[i][0] != '\0'; i++) {
+
         int commandLength = strlen(COMMAND_CWD) + strlen(directories[i]) + 3;
         char commandCwd[commandLength + 1];
         sprintf(commandCwd, "%s %s\r\n", COMMAND_CWD, directories[i]);
 
         int bytesSent = write(controlFd, commandCwd, commandLength);
         if (bytesSent != commandLength) {
-            fprintf(stderr, "ERROR: Number of bytes sent\n");
-            closeConnections();
-            return -1;
+            fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+            return ERROR_WRITE_SOCKET_FAILED;
         }
         printf("Client: %s", commandCwd);
 
         char response[MAX_CONTROL_SIZE + 1];
         int code;
+
         int status = serverResponse(response, &code);
-        if (status == -1) {
+        if (status != SUCCESS) {
             fprintf(stderr, "ERROR: Server response failed\n");
-            closeConnections();
-            return -1;
+            return ERROR_SERVER_RESPONSE_FAILED;
         }
         printf("Server: %s", response);
 
@@ -416,37 +427,78 @@ int cwd(char **directories) {
             SERVER_COMMAND_NOT_IMPLEMENTED,
             SERVER_NOT_AVAILABLE,
             SERVER_NOT_LOGGED_IN,
-            SERVER_FILE_UNAVAILABLE};
+            SERVER_FILE_UNAVAILABLE
+        };
+    
         int result;
-        if ((result = processServerCode(code, possibleCodesCwd, commandCwd, response)) == -1) {
-            return -1;
+        if ((result = processServerCode(code, possibleCodesCwd, commandCwd, response)) != SUCCESS) {
+            return ERROR_SERVER_CODE;
         }
+        printf("\n");
     }
-    return 0;
+    return SUCCESS;
 }
 
 
-// FTP server - Change to typecode format ('I' - binary , 'A' - Ascii) (TYPE)
-int changeType(char typecode){
+int getFileSize(const char* filename, int* fileSize) {
+    int commandLength = strlen(COMMAND_SIZE) + strlen(filename) + 3;
+    char commandSize[commandLength + 1];
+    sprintf(commandSize, "%s %s\r\n", COMMAND_SIZE, filename);
+
+    int bytesSent = write(controlFd, commandSize, commandLength);
+    if (bytesSent != commandLength) {
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        return ERROR_WRITE_SOCKET_FAILED;
+    }
+    printf("Client: %s", commandSize);
+
+    char response[MAX_CONTROL_SIZE + 1];
+    int code;
+
+    int status = serverResponse(response, &code);
+    if (status != SUCCESS) {
+        fprintf(stderr, "ERROR: Server response failed\n");
+        return ERROR_SERVER_RESPONSE_FAILED;
+    }
+    printf("Server: %s", response);
+
+    int possibleCodesSize[1] = { SERVER_FILE_STATUS };
+    int result = processServerCode(code, possibleCodesSize, commandSize, response);
+    if (result != SUCCESS) {
+        return ERROR_SERVER_CODE;
+    }
+
+    if (sscanf(response, "%*d %d", fileSize) != 1) {
+        fprintf(stderr, "ERROR: Failed to parse file size\n");
+        return ERROR_PARSE;
+    }
+
+    return SUCCESS;
+}
+
+int changeType(const char typecode){
+    if (typecode != 'i' && typecode != 'I'){
+        fprintf(stderr, "ERROR: Invalid typecode\n");
+        return ERROR_INVALID_TYPECODE;
+    }
     int commandLength = strlen(COMMAND_TYPE) + 4;
     char commandType[commandLength + 1];
     sprintf(commandType, "%s %c\r\n", COMMAND_TYPE, typecode);
 
     int bytesSent = write(controlFd, commandType, commandLength);
     if (bytesSent != commandLength){
-        fprintf(stderr, "ERROR: Number of bytes sent\n");
-        closeConnections();
-        return -1;
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        return ERROR_WRITE_SOCKET_FAILED;
     }
     printf("Client: %s", commandType);
 
     char response[MAX_CONTROL_SIZE + 1];
     int code;
+
     int status = serverResponse(response, &code);
-    if (status == -1){
+    if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnections();
-        return -1;
+        return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
@@ -456,173 +508,200 @@ int changeType(char typecode){
         SERVER_BAD_PARAMETERS,
         SERVER_COMMAND_NOT_IMPLEMENTED_FOR_PARAMETER,
         SERVER_NOT_AVAILABLE,
-        SERVER_NOT_LOGGED_IN};
+        SERVER_NOT_LOGGED_IN
+    };
     int result;
-    if ((result = processServerCode(code, possibleCodesType, commandType, response)) == -1){
-        return -1;
+    if ((result = processServerCode(code, possibleCodesType, commandType, response)) != SUCCESS){
+        return ERROR_SERVER_CODE;
     }
-    return 0;
+    return SUCCESS;
 }
 
-
-// FTP server - Get file size (SIZE)
-int getFileSize(char* filename, int* fileSize) {
-    int commandLength = strlen(COMMAND_SIZE) + strlen(filename) + 3;
-    char commandSize[commandLength + 1];
-    sprintf(commandSize, "%s %s\r\n", COMMAND_SIZE, filename);
-
-    int bytesSent = write(controlFd, commandSize, commandLength);
-    if (bytesSent != commandLength) {
-        fprintf(stderr, "ERROR: Number of bytes sent\n");
-        closeConnections();
-        return -1;
-    }
-    printf("Client: %s", commandSize);
-
-    char response[MAX_CONTROL_SIZE + 1];
-    int code;
-    int status = serverResponse(response, &code);
-    if (status == -1) {
-        fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnections();
-        return -1;
-    }
-    printf("Server: %s", response);
-
-    int possibleCodesSize[1] = { SERVER_FILE_STATUS };
-    int result = processServerCode(code, possibleCodesSize, commandSize, response);
-    if (result == -1) {
-        return -1;
-    }
-
-    if (sscanf(response, "%*d %d", fileSize) != 1) {
-        fprintf(stderr, "ERROR: Failed to parse file size\n");
-        return -1;
-    }
-
-    return 0;
-}
-// FTP server - PASV
 int enterPassiveMode(char* ip, int* port) {
     int commandLength = strlen(COMMAND_PASV) + 3;
     char commandPasv[commandLength + 1];
-    sprintf(commandPasv, "%s \r\n", COMMAND_PASV);
+    sprintf(commandPasv, "%s\r\n", COMMAND_PASV);
 
+    // Send PASV command to the server
     int bytesSent = write(controlFd, commandPasv, commandLength);
     if (bytesSent != commandLength) {
-        fprintf(stderr, "ERROR: Number of bytes sent\n");
-        closeConnections();
-        return -1;
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        return ERROR_WRITE_SOCKET_FAILED;
     }
+
     printf("Client: %s", commandPasv);
 
     char response[MAX_CONTROL_SIZE + 1];
     int code;
+
+    // Get server response
     int status = serverResponse(response, &code);
-    if (status == -1) {
+    if (status != SUCCESS) {
         fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnections();
-        return -1;
+        return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
-    int possibleCodesPasv[1] = {
-        SERVER_ENTERING_PASSIVE_MODE,
-        SERVER_BAD_COMMAND,
-        SERVER_BAD_PARAMETERS,
-        SERVER_COMMAND_NOT_IMPLEMENTED,
-        SERVER_NOT_AVAILABLE,
-        SERVER_NOT_LOGGED_IN};
-    int result = processServerCode(code, possibleCodesPasv, commandPasv, response);
-    if (result == -1) {
-        return -1;
+    // Check the server response code
+    if (code != SERVER_ENTERING_PASSIVE_MODE) {
+        fprintf(stderr, "ERROR: Unexpected server response code: %d\n", code);
+        return ERROR_SERVER_CODE;
     }
-    return 0;
+
+    int h1, h2, h3, h4, p1, p2;
+    if (sscanf(response, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)",&h1, &h2, &h3, &h4, &p1, &p2) != 6) {
+        fprintf(stderr, "ERROR: Failed to parse IP and port from server response\n");
+        return ERROR_PARSE;
+    }
+
+    sprintf(ip, "%d.%d.%d.%d", h1, h2, h3, h4); // IPv4 address
+    *port = p1 * 256 + p2; // Port
+
+    printf("Parsed IP: %s, Port: %d\n", ip, *port);
+
+    return SUCCESS;
 }
-// FTP server - Download file (RETR)
+
 int downloadFile(const char* filename, const char* localPath) {
     int commandLength = strlen(COMMAND_RETR) + strlen(filename) + 3;
     char commandRetr[commandLength + 1];
     sprintf(commandRetr, "%s %s\r\n", COMMAND_RETR, filename);
 
     int bytesSent = write(controlFd, commandRetr, commandLength);
-    if (bytesSent != commandLength) {
-        fprintf(stderr, "ERROR: Number of bytes sent\n");
-        closeConnections();
-        return -1;
+    if (bytesSent != commandLength){
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        return ERROR_WRITE_SOCKET_FAILED;
     }
     printf("Client: %s", commandRetr);
 
     localFd = fopen(localPath, "wb");
     if (!localFd) {
         fprintf(stderr, "ERROR: Cannot open local file\n");
-        closeConnections();
-        return -1;
+        return ERROR_OPEN_FILE;
     }
+
     char response[MAX_CONTROL_SIZE + 1];
     int code;
+
     int status = serverResponse(response, &code);
-    if (status == -1) {
+    if (status != SUCCESS) {
         fprintf(stderr, "ERROR: Server response failed\n");
         fclose(localFd);
-        closeConnections();
-        return -1;
+        return ERROR_SERVER_RESPONSE_FAILED;
+    }
+
+    printf("Server: %s", response);
+    if (code != SERVER_OPENING_DATA_CONNECTION){
+        fprintf(stderr, "ERROR: Unexpected server response code: %d\n", code);
+        fclose(localFd);
+        return ERROR_SERVER_CODE;
+    }
+
+    status = serverResponse(response, &code);
+    if (status != SUCCESS) {
+        fprintf(stderr, "ERROR: Server response failed\n");
+        fclose(localFd);
+        return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
-    int possibleCodesRetr[12] = {
-        SERVER_DATA_CONNECTION_OPEN,
-        SERVER_OPENING_DATA_CONNECTION,
-        SERVER_DATA_CONNECTION_CLOSE,
-        SERVER_FILE_ACTION_OK,
-        SERVER_CANNOT_OPEN_DATA_CONNECTION,
-        SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED,
-        SERVER_REQUESTED_FILE_ACTION_ABORTED,
-        SERVER_REQUESTED_ACTION_ABORTED,
-        SERVER_BAD_COMMAND,
-        SERVER_BAD_PARAMETERS,
-        SERVER_NOT_AVAILABLE,
-        SERVER_NOT_LOGGED_IN};
-    int result = processServerCode(code, possibleCodesRetr, commandRetr, response);
-    if (result == -1) {
+    if (code != SERVER_DATA_CONNECTION_CLOSE){
+        fprintf(stderr, "ERROR: Unexpected server response code: %d\n", code);
         fclose(localFd);
-        return -1;
+        return ERROR_SERVER_CODE;
     }
 
     fclose(localFd);
-    printf("File downloaded successfully: %s\n", localPath);
+    printf("File downloaded successfully: %s/%s\n", localPath,filename);
 
-    return 0;
+    return SUCCESS;
 }
-//int download(){}
+
+int download(char directories[21][256], const char* filename, const char typecode){
+
+    // Change directories
+    if (cwd(directories) != SUCCESS){
+        closeConnection(controlFd);
+        return ERROR_CWD_FAILED;
+    }
+
+    // Type code (Only Image supported)
+    if (changeType(typecode)){
+        closeConnection(controlFd);
+        return ERROR_CHANGE_TYPE_FAILED;
+    }
+
+    // Get file size
+    int fileSize;
+    if (getFileSize(filename, &fileSize) != SUCCESS){
+        closeConnection(controlFd);
+        return ERROR_GET_SIZE_FAILED;
+    }
+
+    // Enter passive mode
+    char ip[256];
+    int port;
+    if (enterPassiveMode(ip, &port) != SUCCESS){
+        closeConnection(controlFd);
+        return ERROR_ENTER_PASSIVE_MODE_FAILED;
+    }
+
+    // Open data connection
+    dataFd = createConnection(ip,port);
+    if (controlFd < 0){
+        fprintf(stderr,"ERROR: Cannot establish connection to server\n");
+        closeConnection(dataFd);
+        closeConnection(controlFd);
+        return ERROR_CONNECTION_SERVER_FAILED;
+    }
+    printf("Client: Connection open on ip:%s, port:%d\n\n", ip, port);
+
+
+    // Download file
+    char* localPath = "../downloads";
+    if (downloadFile(filename,localPath) !=  SUCCESS){
+        closeConnection(dataFd);
+        closeConnection(controlFd);
+        return ERROR_DOWNLOAD_FILE_FAILED;
+    }
+
+    return closeConnection(dataFd);
+}
 
 // Logout
 int logout(){
-    // Quit
+
+    // (QUIT)
     int commandLength = strlen(COMMAND_QUIT);
     int bytesSent = write(controlFd, COMMAND_QUIT, commandLength);
     if (bytesSent != commandLength){
-        fprintf(stderr, "ERROR: Number of bytes sent\n");
-        closeConnections();
-        return -1;
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        closeConnection(controlFd);
+        return ERROR_WRITE_SOCKET_FAILED;
     }
     printf("Client: %s", COMMAND_QUIT);
 
     char response[MAX_CONTROL_SIZE + 1];
     int code;
+
     int status = serverResponse(response, &code);
-    if (status == -1){
+    if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnections();
-        return -1;
+        closeConnection(controlFd);
+        return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
-    int possibleCodesQuit[2] = {221, 500};
-    int result;
-    if ((result = processServerCode(code, possibleCodesQuit, COMMAND_QUIT, response)) == -1){
-        return -1;
+    int possibleCodesQuit[2] = {
+        SERVER_QUIT, 
+        SERVER_BAD_COMMAND,
+    };
+
+    int result = processServerCode(code, possibleCodesQuit, COMMAND_QUIT, response);
+    if (result != SUCCESS){
+        return ERROR_SERVER_CODE;
     }
-    return 0;
+
+    return closeConnection(controlFd);
 }
 
