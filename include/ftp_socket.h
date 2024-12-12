@@ -16,6 +16,10 @@
 // Connection settings
 #define IPV4 AF_INET
 #define CONNECTION_TYPE SOCK_STREAM
+#define URL_FIELD_MAX_LENGTH 255
+#define URL_MAX_CWD 20
+#define LOCAL_PATH_MAX_LENGTH 512
+#define DATA_CHUNK_SIZE 100
 
 // Server code settings
 #define CODE_SIZE 3
@@ -37,17 +41,16 @@
 
 // Code 300
 #define SERVER_SPECIFY_PASSWORD 331
-#define PASSWORD 1
 #define SERVER_NEED_ACCT 332
 
-// code 400
+// Code 400
 #define SERVER_NOT_AVAILABLE 421
 #define SERVER_CANNOT_OPEN_DATA_CONNECTION 425
 #define SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED 426
 #define SERVER_REQUESTED_FILE_ACTION_ABORTED 450
 #define SERVER_REQUESTED_ACTION_ABORTED 451
 
-// code 500
+// Code 500
 #define SERVER_BAD_COMMAND 500
 #define SERVER_BAD_PARAMETERS 501
 #define SERVER_COMMAND_NOT_IMPLEMENTED 502
@@ -55,11 +58,6 @@
 #define SERVER_COMMAND_NOT_IMPLEMENTED_FOR_PARAMETER 504
 #define SERVER_NOT_LOGGED_IN 530
 #define SERVER_FILE_UNAVAILABLE 550
-
-// Timeout sockets
-#define MAX_TIMEOUT_TRIES 5
-#define SECONDS 2
-#define MILLISECONDS 0
 
 // Commands
 #define COMMAND_USER "USER"
@@ -69,37 +67,50 @@
 #define COMMAND_SIZE "SIZE"
 #define COMMAND_PASV "PASV"
 #define COMMAND_RETR "RETR"
-#define COMMAND_QUIT "QUIT\r\n"
+#define COMMAND_QUIT "QUIT"
 
 // Error codes
 #define SUCCESS 0
-#define ERROR_SOCKET_CREATION_FAILED -1
-#define ERROR_CONNECTION_SERVER_FAILED -2
-#define ERROR_NULL_PARAMETERS -3
-#define ERROR_CLOSING_SOCKET -4
-#define ERROR_EXCEEDED_MAX_SIZE -6
-#define ERROR_SERVER_CLOSED_CONNECTION -7
-#define ERROR_READ_SOCKET_FAILED -8
-#define ERROR_WRITE_SOCKET_FAILED -9
-#define ERROR_WRITE_FILE_FAILED -10
-#define ERROR_MAX_TIMEOUT -11
-#define ERROR_SERVER_RESPONSE_FAILED -12
-#define ERROR_SERVER_CODE -13
-#define ERROR_OPEN_CONTROL_CONNECTION -14
-#define ERROR_AUTHENTICATION_FAILED -15
-#define ERROR_CWD_FAILED -16
-#define ERROR_PARSE -17
-#define ERROR_GET_SIZE_FAILED -18
-#define ERROR_INVALID_TYPECODE -19
-#define ERROR_CHANGE_TYPE_FAILED -20
-#define ERROR_ENTER_PASSIVE_MODE_FAILED -21
-#define ERROR_OPEN_FILE -22
-#define ERROR_DOWNLOAD_FILE_FAILED -23
+
+// Sockets
+#define ERROR_OPEN_SOCKET -1
+#define ERROR_CLOSE_SOCKET -2
+#define ERROR_OPEN_SOCKET_FAILED -3
+#define ERROR_CLOSE_SOCKET_FAILED -4
+#define ERROR_READ_SOCKET_FAILED -5
+#define ERROR_WRITE_SOCKET_FAILED -6
+
+// Server
+#define ERROR_CONNECTION_SERVER_FAILED -7
+#define ERROR_SERVER_CLOSED_CONNECTION -8
+#define ERROR_SERVER_RESPONSE_FAILED -9
+#define ERROR_SERVER_CODE -10
+#define ERROR_SERVER_CODE_EXPECTED -11
+#define ERROR_SERVER_CODE_NOT_EXPECTED -12
+#define CHANGE_SERVER_REDIRECT_PASSWORD -13
+
+// File
+#define ERROR_WRITE_FILE_FAILED -14
+#define ERROR_OPEN_FILE -15
+#define ERROR_CLOSE_FILE -16
+
+// Login
+#define ERROR_OPEN_CONTROL_CONNECTION -15
+#define ERROR_AUTHENTICATION_FAILED -16
+
+// Download
+#define ERROR_CWD -17
+#define ERROR_CHANGE_TYPE -18
+#define ERROR_GET_FILE_SIZE -19
+#define ERROR_ENTER_PASSIVE_MODE -20
+#define ERROR_OPEN_DATA_CONNECTION -21
+#define ERROR_DOWNLOAD_FILE -22
+
+// Others
+#define ERROR_PARSE -23
+#define ERROR_EXCEEDED_MAX_ARRAY_SIZE -24
 
 // States
-/**
- * @enum State - States for reading control responses from the server
- */
 typedef enum {
     STATE_WAIT_CODE,
     STATE_WAIT_SP,
@@ -114,39 +125,30 @@ typedef enum {
 } DataState;
 
 /**
- * @brief Open a connection to the server on ip,port.
- * @param ip - IP address
- * @param port - Port number
+ * @brief This function opens a socket at the specified server address
+ * @param ip - The server IP address
+ * @param port - The server port
+ * @param server_addr - The server address
  */
-int createConnection(const char* ip, const int port);
+int openSocket(const char* ip, const int port, struct sockaddr_in* server_addr);
 
 /**
- * @brief Close a connection on file descriptor fd
- * @param fd - File descriptor
+ * @brief This function closes a socket
+ * @param fd - The file descriptor
  */
-int closeConnection(int fd);
+int closeSocket(int fd);
 
 /**
- * @brief Open control connection
- * @param ip - IP address
- * @param host - Host name
- * @param port - Port number 
+ * @brief This function reads control responses from the server
+ * @param responseControl - The control response
+ * @param code - The control response code
  */
-int openControlConnection(const char* ip, const char* host, const int port);
+int serverResponseControl(char *responseControl, int *code);
 
 /**
- * @brief Authenticate user with username and password.
- * @param username - User name
- * @param password - Password
+ * @brief This function reads data from the server
  */
-int authenticateCredentials(const char* username, const char* password);
-
-/**
- * @brief Read server control responses
- * @param response - Server response
- * @param code - Server response code
- */
-int serverResponse(char* response, int* code);
+int serverResponseData();
 
 /**
  * @brief Process response code, (RFC959 codes)
@@ -158,33 +160,82 @@ int serverResponse(char* response, int* code);
 int processServerCode(const int code, const int* possibleCodes, const char* command, const char* response);
 
 /**
- * @brief Login user account
+ * @brief This function opens a control connection to the server
+ * @param ip - The server IP address
+ * @param host - The server host name
+ * @param port - The server port
+ */
+int openControlConnection(const char* ip, const char* host, const int port);
+
+/**
+ * @brief This function opens a data connection to the server
+ * @param ip - The server IP address
+ * @param port - The server port
+ */
+int openDataConnection(const char* ip, const int port);
+
+/**
+ * @brief Authenticate user with username and password.
  * @param username - User name
  * @param password - Password
- * @param ip - IP address
- * @param port - Port number
- * @param host - Host name
  */
+int authenticateCredentials(const char* username, const char* password);
 
 /**
- * @brief Change working directory
- * @param directiories - All directories to do CWD
+ * @brief Logic of connection and authentication
+ * @param username - User name
+ * @param password - Password
+ * @param ip - The server IP address
+ * @param host - The server host name
+ * @param port - The server port
  */
-int cwd(char directories[21][256]);
+int login(const char* username, const char* password, const char* ip, const char* host, const int port);
 
 /**
- * @brief Download a resource from the server
+ * @brief Go to specified directory
+ * @param directories - List of directories
+ */
+int cwd(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1]);
+
+/**
+ * @brief Set type for file transfer
+ * @param typecode - File transfer type
+ */
+int changeType(const char typecode);
+
+/**
+ * @brief Get size of the file requested in URL
+ * @param filename - File name
+ * @param fileSize - File size (Result)
+ */
+int getFileSize(const char* filename, int* fileSize);
+
+/**
+ * @brief Open passive mode for file transfer
+ * @param ip - Ip address for file transfer (Result)
+ * @param port - Port number for file transfer (Result)
+ */
+int enterPassiveMode(char* ip, int* port);
+
+/**
+ * @brief Retrieve file
+ * @param filename - File name
+ * @param localPath - File path on local filesystem (save path)
+ */
+int downloadFile(const char* filename, const char* localPath);
+
+/**
+ * @brief Logic of download file
  * @param directories - List of directories
  * @param filename - File name
- * @param typecode - (TYPE)
+ * @param typecode - File transfer type
  */
-int download(char directories[21][256], const char* filename, const char typecode);
-
-int login(const char *username, const char *password, const char* ip, const char* host, const int port);
+int download(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1], const char* filename, const char typecode);
 
 /**
  * @brief Disconnect from server
  */
 int logout();
+
 
 #endif // _FTP_SOCKET_H_

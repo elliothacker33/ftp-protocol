@@ -4,6 +4,8 @@ CFLAGS = -Wall -g -O2
 SRC = src
 INCLUDE = include
 BIN = bin
+DOWNLOADS = downloads
+
 
 SRC_FILES = $(wildcard $(SRC)/*.c)
 
@@ -27,6 +29,6 @@ uninstall:
 	sudo rm -f /usr/local/bin/download           
 
 clean:
-	rm -f $(BIN)/download
+	rm -f $(BIN)/download $(DOWNLOADS)/*
 
 

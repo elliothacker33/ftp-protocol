@@ -1,178 +1,142 @@
 #include <fcntl.h>
 #include "ftp_socket.h"
 
-// File descriptor for control and data 
+// FILE DESCRIPTORS
 int controlFd = -1;
 int dataFd = -1;
 FILE* localFd;
 
-int createConnection(const char* ip, const int port){
-
-    struct sockaddr_in server_addr;
-    bzero((char*)&server_addr, sizeof(server_addr));
-    server_addr.sin_family = IPV4;
-    server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = inet_addr(ip);    
+// SOCKETS
+int openSocket(const char* ip, const int port, struct sockaddr_in* server_addr){
     
+    // Socket settings (server address)
+    bzero(server_addr, sizeof(*server_addr));
+    server_addr->sin_family = IPV4;
+    server_addr->sin_port = htons(port);
+    server_addr->sin_addr.s_addr = inet_addr(ip);    
+    
+    // Open socket
     int fd = socket(IPV4, CONNECTION_TYPE, 0);
     if (fd < 0){
         fprintf(stderr, "ERROR: Socket creation failed\n");
-        return ERROR_SOCKET_CREATION_FAILED;
-    }
-
-    if (connect(fd, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
-        fprintf(stderr, "ERROR: Connection failed\n");
-        return ERROR_CONNECTION_SERVER_FAILED;
+        return ERROR_OPEN_SOCKET_FAILED;
     }
 
     return fd;
+
 }
 
-int closeConnection(int fd){
+int closeSocket(int fd){
 
-    if (fd != -1 && close(fd) == -1){
+    // Close socket
+    if (fd < 0 && close(fd) == -1){
         fprintf(stderr, "ERROR: Closing control socket\n");
-        return ERROR_CLOSING_SOCKET;
+        return ERROR_CLOSE_SOCKET_FAILED;
     }
 
     fd = -1;
     return SUCCESS;
+
 }
 
-int closeDataConnection(){
-    // Close data socket
-    if (dataFd != -1 && close(dataFd) == -1){
-        fprintf(stderr, "ERROR: Closing data socket\n");
-        return -1;
-    }
+// SERVER RESPONSE (RECEIVE + PROCESSING)
+int serverResponseControl(char *responseControl, int *code){
 
-    dataFd = -1;
-    return 0;
-}
-
-
-int serverResponse(char *responseControl, int *code) {
-
-    // Read byte
     char byte;
-
-    // States
     ControlState stateC = STATE_WAIT_CODE;
-    DataState stateD = STATE_WAIT_DATA;
 
-    // Code and response
     int totalBytes = 0, digitsRead = 0;
     *code = 0;
     memset(responseControl, 0, MAX_CONTROL_SIZE + 1);
 
-    // Select 
-    int maxFd;
-    fd_set readFdSet;
-    struct timeval timeout;
-    timeout.tv_sec = SECONDS;
-    timeout.tv_usec = MILLISECONDS;
-    int tries = 0;
+    // Control response - <CODE> <SP> ... <CRLF> - Stopping condition
+    while (stateC != STATE_STOP) {
 
-    while ((stateC != STATE_STOP && controlFd != -1) || (stateD != STATE_FULL_FILE_READ && dataFd != -1)) {
-        // Sets 
-        FD_ZERO(&readFdSet);
-
-        // Add controlFd to set
-        if (controlFd != -1){
-            FD_SET(controlFd, &readFdSet);
-        }
-        // Add dataFd to set
-        if (dataFd != -1){
-            FD_SET(dataFd, &readFdSet);
-        }
-        // Wait for data
-        maxFd = (controlFd > dataFd) ? controlFd : dataFd;
-        int ready = select(maxFd + 1, &readFdSet, NULL, NULL, &timeout);
-
-        if (ready != -1) {
-            tries = 0; // Reset tries
-
-            // Read from control file descriptor
-            if (controlFd != -1 && FD_ISSET(controlFd, &readFdSet) && stateC != STATE_STOP) {
-                int bytesRead = read(controlFd, &byte, 1);
-                if (bytesRead > 0) {
-                    if (totalBytes >= MAX_CONTROL_SIZE) {
-                        fprintf(stderr, "ERROR: Response exceeded max size\n");
-                        return ERROR_EXCEEDED_MAX_SIZE;
-                    }
-                    responseControl[totalBytes++] = byte;
-
-                    switch (stateC) {
-                        case STATE_WAIT_CODE:
-                            if (isdigit(byte)) {
-                                digitsRead++;
-                                *code = *code * 10 + (byte - '0');
-                                if (digitsRead == 3){
-                                    stateC = STATE_WAIT_SP;
-                                }
-                            } else {
-                                digitsRead = 0;
-                                *code = 0;
-                            }
-                            break;
-
-                        case STATE_WAIT_SP:
-                            stateC = (byte == ' ') ? STATE_WAIT_CR : STATE_WAIT_CODE;
-                            break;
-
-                        case STATE_WAIT_CR:
-                            stateC = (byte == '\r') ? STATE_WAIT_LF : STATE_WAIT_CR;
-                            break;
-
-                        case STATE_WAIT_LF:
-                            if (byte == '\n') {
-                                responseControl[totalBytes] = '\0';
-                                stateC = STATE_STOP;
-                            }
-                            break;
-
-                        default:
-                            digitsRead = 0;
-                            *code = 0;
-                            stateC = STATE_WAIT_CODE;
-                            break;
-                    }
-                } else if (bytesRead == 0) {
-                    fprintf(stderr, "ERROR: Server closed connection\n");
-                    return ERROR_SERVER_CLOSED_CONNECTION;
-                } else {
-                    fprintf(stderr, "ERROR: Reading from data connection\n");
-                    return ERROR_READ_SOCKET_FAILED;
-                }
+        int bytesRead = read(controlFd, &byte, 1);
+        // Handle control read from controlFd
+        if (bytesRead > 0) {
+            if (totalBytes >= MAX_CONTROL_SIZE) {
+                fprintf(stderr, "ERROR: Response exceeded max size\n");
+                return ERROR_EXCEEDED_MAX_ARRAY_SIZE;
             }
-            
-            // Read from data file descriptor
-            if (dataFd != -1 && FD_ISSET(dataFd, &readFdSet) && stateD != STATE_FULL_FILE_READ) {
-                int bytesRead = read(dataFd, &byte, 1);
-                if (bytesRead > 0) {
-                    // Handle data read from dataFd
-                    if (fwrite(&byte, 1, bytesRead, localFd) != bytesRead) {
-                        fprintf(stderr, "ERROR: Writing to local file\n");
-                        return ERROR_WRITE_FILE_FAILED;
+            responseControl[totalBytes++] = byte;
+
+            switch (stateC) {
+                case STATE_WAIT_CODE:
+                    if (isdigit(byte)) {
+                        digitsRead++;
+                        *code = *code * 10 + (byte - '0');
+                        if (digitsRead == 3){
+                            stateC = STATE_WAIT_SP;
+                        }
+                    } else {
+                        digitsRead = 0;
+                        *code = 0;
                     }
-                } else if (bytesRead == 0) {
-                    stateD = STATE_FULL_FILE_READ;
-                } else {
-                    fprintf(stderr, "ERROR: Reading from data connection\n");
-                    return ERROR_READ_SOCKET_FAILED;
-                }
-            }
-        } else {
-            tries++;
-            if (tries >= MAX_TIMEOUT_TRIES) {
-                fprintf(stderr, "ERROR: Server response timeout\n");
-                return ERROR_MAX_TIMEOUT;
+                    break;
+
+                case STATE_WAIT_SP:
+                    stateC = (byte == ' ') ? STATE_WAIT_CR : STATE_WAIT_CODE;
+                    break;
+
+                case STATE_WAIT_CR:
+                    stateC = (byte == '\r') ? STATE_WAIT_LF : STATE_WAIT_CR;
+                    break;
+
+                case STATE_WAIT_LF:
+                    if (byte == '\n') {
+                        responseControl[totalBytes] = '\0';
+                        stateC = STATE_STOP;
+                    }
+                    break;
+
+                default:
+                    digitsRead = 0;
+                    *code = 0;
+                    stateC = STATE_WAIT_CODE;
+                    break;
             }
         }
+        else if (bytesRead == 0) {
+            fprintf(stderr, "ERROR: Server closed connection\n");
+            return ERROR_SERVER_CLOSED_CONNECTION;
+        } 
+        else{
+            fprintf(stderr, "ERROR: Reading from data connection\n");
+            return ERROR_READ_SOCKET_FAILED;
+        }
+
     }
-
     return SUCCESS;
 }
+
+int serverResponseData(){
+
+    DataState stateD = STATE_WAIT_DATA;
+    char byte[DATA_CHUNK_SIZE];
+
+    // Data response - Read until server closes data connection - Stopping condition
+    while (stateD != STATE_FULL_FILE_READ){
+
+        int bytesRead = read(dataFd, byte, DATA_CHUNK_SIZE);    
+        if (bytesRead > 0) {
+            // Handle data read from dataFd
+            if (fwrite(byte, 1, bytesRead, localFd) != bytesRead) {
+                fprintf(stderr, "ERROR: Writing to local file\n");
+                return ERROR_WRITE_FILE_FAILED;
+            }
+        } else if (bytesRead == 0) {
+            stateD = STATE_FULL_FILE_READ;
+        } else {
+            fprintf(stderr, "ERROR: Reading from data connection\n");
+            return ERROR_READ_SOCKET_FAILED;
+        }
+
+    }
+    return closeSocket(dataFd);
+
+}
+
 
 int processServerCode(const int code, const int* possibleCodes, const char* command, const char* response){
     for(int i = 0; i < sizeof(possibleCodes); i++){
@@ -185,7 +149,7 @@ int processServerCode(const int code, const int* possibleCodes, const char* comm
                         sleep(minutes * 60);
                     } else {
                         fprintf(stderr, "ERROR: Failed to parse wait time from server response\n");
-                        return ERROR_SERVER_CODE;
+                        return ERROR_SERVER_CODE_EXPECTED;
                     }
                     break;
                 }
@@ -193,14 +157,14 @@ int processServerCode(const int code, const int* possibleCodes, const char* comm
                     printf("Client: Data connection open\n");
                     break;
                 case SERVER_OPENING_DATA_CONNECTION:
-                    printf("Client: Opening data connection\n");
+                    printf("Client: File transfer started\n");
                     break;
                 case SERVER_COMMAND_OK:
                     printf("Client: Command -> %s, successful\n\n", command);
                     break;
                 case SERVER_COMMAND_NOT_IMPLEMENTED_SUPERFLUOUS:
                     printf("Client: Command -> %s, not implemented on this server at superfluous level\n", command);
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_FILE_STATUS:
                     printf("Client: File status -> %s\n", response);
                     break;
@@ -224,94 +188,131 @@ int processServerCode(const int code, const int* possibleCodes, const char* comm
                     break;
                 case SERVER_SPECIFY_PASSWORD:
                     printf("Client: Server requires password\n\n");
-                    return PASSWORD;
+                    return CHANGE_SERVER_REDIRECT_PASSWORD;
                 case SERVER_NOT_AVAILABLE:
                     printf("Client: Server is not available\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_CANNOT_OPEN_DATA_CONNECTION:
                     printf("Client: Cannot open data connection\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED:
                     printf("Client: Data connection closed, transfer aborted\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_REQUESTED_FILE_ACTION_ABORTED:
                     printf("Client: Requested file action aborted\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_REQUESTED_ACTION_ABORTED:
                     printf("Client: Requested action aborted\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_BAD_COMMAND:
                     printf("Client: This command is malformed (command type) -> %s\n",command);
                     printf("Help: See RFC 959 for right command usage\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_BAD_PARAMETERS:
                     printf("Client: This command is malformed (command parameters) -> %s\n",command);
                     printf("Help: See RFC 959 for right command usage\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_COMMAND_NOT_IMPLEMENTED:
                     printf("Client: Command -> %s, is not implemented on this server\n",command);
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_COMMAND_NOT_IMPLEMENTED_FOR_PARAMETER:
                     printf("Client: Command -> %s, is not implemented for this parameter\n",command);
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_NOT_LOGGED_IN:
                     printf("Client: username,password or account name are wrong\n");
                     printf("Help: Change username to anonymous, or to right account.\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
                 case SERVER_FILE_UNAVAILABLE:
                     printf("Client: File is unavailable\n");
-                    return ERROR_SERVER_CODE;
+                    return ERROR_SERVER_CODE_EXPECTED;
             }
             return SUCCESS;
         }
     }
 
     fprintf(stderr,"ERROR: Server code not expected (RFC959 standards)\n");
-    return ERROR_SERVER_CODE;
+    return ERROR_SERVER_CODE_NOT_EXPECTED;
+
 }
 
+// OPEN CONNECTIONS
 int openControlConnection(const char* ip, const char* host, const int port){
 
-    printf("Client: Trying to establish connection to %s...\n", host);
-    controlFd = createConnection(ip, port);
-
+    // Open control Socket
+    struct sockaddr_in server_addr;
+    controlFd = openSocket(ip, port, &server_addr);
     if (controlFd < 0){
-        fprintf(stderr,"ERROR: Cannot establish connection to server\n");
+        fprintf(stderr,"ERROR: Cannot open control socket\n");
+        return ERROR_OPEN_SOCKET;
+    }
+
+    // Create control connection
+    printf("Client: Trying to establish a control connection on ip: %s, port: %d...\n", ip, port);
+    if (connect(controlFd, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
+        fprintf(stderr, "ERROR: Connection failed\n");
         return ERROR_CONNECTION_SERVER_FAILED;
     }
 
+    // Read control response for connection (220)
     char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    int status = serverResponse(response, &code);
+    int code, status;
+    status = serverResponseControl(response, &code);
     if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
         return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
+    // Process response from server
     int possibleCodesConnect[3] = {
         SERVER_WAIT_N,
         SERVER_READY,
         SERVER_NOT_AVAILABLE
     };
-
     int result = processServerCode(code, possibleCodesConnect, NULL, response);
     if (result != SUCCESS){
         return ERROR_SERVER_CODE;
     }
 
-    printf("Client: Connection open on ip:%s, hostname:%s, port:%d\n\n",ip,host,port);
+    printf("Client: Control connection open on ip:%s, hostname:%s, port:%d\n\n",ip,host,port);
     return SUCCESS;
+
 }
 
+int openDataConnection(const char* ip, const int port){
+
+    // Open data socket
+    struct sockaddr_in server_addr;
+    dataFd = openSocket(ip, port, &server_addr);
+    if (dataFd < 0){
+        fprintf(stderr,"ERROR: Cannot open data socket\n");
+        return ERROR_OPEN_SOCKET;
+    }
+
+    // Create control connection
+    printf("Client: Trying to establish a data connection on ip: %s, port: %d...\n", ip, port);
+    if (connect(dataFd, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
+        fprintf(stderr, "ERROR: Connection failed\n");
+        return ERROR_CONNECTION_SERVER_FAILED;
+    }
+
+    // Shutdown write connection
+    shutdown(dataFd, SHUT_WR);
+
+    printf("Client: Data connection open on ip:%s, port:%d\n\n",ip, port);
+    return SUCCESS;
+
+}
+
+// LOGIN (OPEN CONNECTION + AUTHENTICATION)
 int authenticateCredentials(const char* username, const char* password){
 
-    // (USER)
+    // Build (USER) command
     int commandLength = strlen(COMMAND_USER) + strlen(username) + 3; // 3 - SPACE + \r + \n
     char commandUser[commandLength + 1]; 
     sprintf(commandUser, "%s %s\r\n", COMMAND_USER, username);
 
+    // Send (USER) command
     int bytesSent = write(controlFd, commandUser, commandLength);
     if (bytesSent != commandLength){
         fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
@@ -319,16 +320,17 @@ int authenticateCredentials(const char* username, const char* password){
     }
     printf("Client: %s", commandUser);
 
+    // Read response for authentication (230/331)
     char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    int status = serverResponse(response, &code);
+    int code, status;
+    status = serverResponseControl(response, &code);
     if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
         return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
+    // Process response from server
     int possibleCodesUser[6] = {
         SERVER_LOGGED_IN,
         SERVER_NOT_LOGGED_IN,
@@ -343,13 +345,14 @@ int authenticateCredentials(const char* username, const char* password){
         printf("Client: Authentication successful (Only USER authentication)\n");
         return SUCCESS;
     }
-    else if (result == PASSWORD){
+    else if (result == CHANGE_SERVER_REDIRECT_PASSWORD){
 
-        // (PASS)
-        commandLength = strlen(COMMAND_PASS) + strlen(password) + 3;
+        // Build (PASS) command
+        commandLength = strlen(COMMAND_PASS) + strlen(password) + 3; // 3 - SPACE + \r + \n
         char commandPass[commandLength + 1];
         sprintf(commandPass, "%s %s\r\n", COMMAND_PASS, password);
 
+        // Send (PASS) command
         int bytesSent = write(controlFd, commandPass, commandLength);
         if (bytesSent != commandLength){
             fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
@@ -357,13 +360,15 @@ int authenticateCredentials(const char* username, const char* password){
         }
         printf("Client: %s", commandPass);
 
-        status = serverResponse(response, &code);
+        // Read response for authentication (230)
+        status = serverResponseControl(response, &code);
         if (status != SUCCESS){
             fprintf(stderr, "ERROR: Server response failed\n");
             return ERROR_SERVER_RESPONSE_FAILED;
         }
         printf("Server: %s", response);
-
+        
+        // Process response from server
         int possibleCodesPass[7] = {
             SERVER_LOGGED_IN,
             SERVER_COMMAND_NOT_IMPLEMENTED_SUPERFLUOUS,
@@ -384,36 +389,39 @@ int authenticateCredentials(const char* username, const char* password){
     }
 
     return SUCCESS;
+
 }
 
-// Login
+
 int login(const char* username, const char* password, const char* ip, const char* host, const int port){
  
       // Connect to server
     if (openControlConnection(ip, host, port) != SUCCESS){
-        closeConnection(controlFd);
+        closeSocket(controlFd);
         return ERROR_OPEN_CONTROL_CONNECTION;
     };
 
-    // Authenticate (USER,PASS)
+    // Authenticate (USER + [PASS]?)
     if (authenticateCredentials(username, password) != SUCCESS){
-        closeConnection(controlFd);
+        closeSocket(controlFd);
         return ERROR_AUTHENTICATION_FAILED;
     }
 
     return SUCCESS;
+
 }
 
+// CHANGE DIRECTORY
+int cwd(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1]){
 
-
-
-int cwd(char directories[21][256]){
     for (int i = 0; directories[i][0] != '\0'; i++) {
-
+        
+        // Build (CWD) command
         int commandLength = strlen(COMMAND_CWD) + strlen(directories[i]) + 3;
         char commandCwd[commandLength + 1];
         sprintf(commandCwd, "%s %s\r\n", COMMAND_CWD, directories[i]);
 
+        // Send (CWD) command
         int bytesSent = write(controlFd, commandCwd, commandLength);
         if (bytesSent != commandLength) {
             fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
@@ -421,16 +429,17 @@ int cwd(char directories[21][256]){
         }
         printf("Client: %s", commandCwd);
 
+        // Read response for changing directory (250)
         char response[MAX_CONTROL_SIZE + 1];
-        int code;
-
-        int status = serverResponse(response, &code);
+        int code,status;
+        status = serverResponseControl(response, &code);
         if (status != SUCCESS) {
             fprintf(stderr, "ERROR: Server response failed\n");
             return ERROR_SERVER_RESPONSE_FAILED;
         }
         printf("Server: %s", response);
 
+        // Process response from server
         int possibleCodesCwd[7] = {
             SERVER_FILE_ACTION_OK,
             SERVER_BAD_COMMAND,
@@ -448,54 +457,18 @@ int cwd(char directories[21][256]){
         printf("\n");
     }
     return SUCCESS;
+
 }
 
-
-int getFileSize(const char* filename, int* fileSize) {
-    int commandLength = strlen(COMMAND_SIZE) + strlen(filename) + 3;
-    char commandSize[commandLength + 1];
-    sprintf(commandSize, "%s %s\r\n", COMMAND_SIZE, filename);
-
-    int bytesSent = write(controlFd, commandSize, commandLength);
-    if (bytesSent != commandLength) {
-        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
-        return ERROR_WRITE_SOCKET_FAILED;
-    }
-    printf("Client: %s", commandSize);
-
-    char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    int status = serverResponse(response, &code);
-    if (status != SUCCESS) {
-        fprintf(stderr, "ERROR: Server response failed\n");
-        return ERROR_SERVER_RESPONSE_FAILED;
-    }
-    printf("Server: %s", response);
-
-    int possibleCodesSize[1] = { SERVER_FILE_STATUS };
-    int result = processServerCode(code, possibleCodesSize, commandSize, response);
-    if (result != SUCCESS) {
-        return ERROR_SERVER_CODE;
-    }
-
-    if (sscanf(response, "%*d %d", fileSize) != 1) {
-        fprintf(stderr, "ERROR: Failed to parse file size\n");
-        return ERROR_PARSE;
-    }
-
-    return SUCCESS;
-}
-
+// CHANGE TRANSFER TYPE CODE
 int changeType(const char typecode){
-    if (typecode != 'i' && typecode != 'I'){
-        fprintf(stderr, "ERROR: Invalid typecode\n");
-        return ERROR_INVALID_TYPECODE;
-    }
+
+    // Build (TYPE) command
     int commandLength = strlen(COMMAND_TYPE) + 4;
     char commandType[commandLength + 1];
     sprintf(commandType, "%s %c\r\n", COMMAND_TYPE, typecode);
 
+    // Send (TYPE) command
     int bytesSent = write(controlFd, commandType, commandLength);
     if (bytesSent != commandLength){
         fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
@@ -503,16 +476,17 @@ int changeType(const char typecode){
     }
     printf("Client: %s", commandType);
 
+    // Read response for changing type (200)
     char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    int status = serverResponse(response, &code);
+    int code, status;
+    status = serverResponseControl(response, &code);
     if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
         return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
+    // Process response from server
     int possibleCodesType[6] = {
         SERVER_COMMAND_OK,
         SERVER_BAD_COMMAND,
@@ -526,27 +500,72 @@ int changeType(const char typecode){
         return ERROR_SERVER_CODE;
     }
     return SUCCESS;
+
 }
 
+// GET SIZE OF THE REQUESTED FILE
+int getFileSize(const char* filename, int* fileSize){
+
+    // Build (SIZE) command
+    int commandLength = strlen(COMMAND_SIZE) + strlen(filename) + 3;
+    char commandSize[commandLength + 1];
+    sprintf(commandSize, "%s %s\r\n", COMMAND_SIZE, filename);
+
+    // Send (SIZE) command
+    int bytesSent = write(controlFd, commandSize, commandLength);
+    if (bytesSent != commandLength) {
+        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+        return ERROR_WRITE_SOCKET_FAILED;
+    }
+    printf("Client: %s", commandSize);
+
+    // Read response for getting file size (213)
+    char response[MAX_CONTROL_SIZE + 1];
+    int code, status;
+    status = serverResponseControl(response, &code);
+    if (status != SUCCESS) {
+        fprintf(stderr, "ERROR: Server response failed\n");
+        return ERROR_SERVER_RESPONSE_FAILED;
+    }
+    printf("Server: %s", response);
+
+    // Process response from server
+    int possibleCodesSize[1] = { SERVER_FILE_STATUS };
+    int result = processServerCode(code, possibleCodesSize, commandSize, response);
+    if (result != SUCCESS) {
+        return ERROR_SERVER_CODE;
+    }
+
+    // Parse file size from the response
+    if (sscanf(response, "%*d %d", fileSize) != 1) {
+        fprintf(stderr, "ERROR: Failed to parse file size\n");
+        return ERROR_PARSE;
+    }
+
+    return SUCCESS;
+
+}
+
+// ENTER PASSIVE MODE
 int enterPassiveMode(char* ip, int* port) {
-    int commandLength = strlen(COMMAND_PASV) + 3;
+
+    // Build (PASV) command
+    int commandLength = strlen(COMMAND_PASV) + 2;
     char commandPasv[commandLength + 1];
     sprintf(commandPasv, "%s\r\n", COMMAND_PASV);
 
-    // Send PASV command to the server
+    // Send (PASV) command 
     int bytesSent = write(controlFd, commandPasv, commandLength);
     if (bytesSent != commandLength) {
         fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
         return ERROR_WRITE_SOCKET_FAILED;
     }
-
     printf("Client: %s", commandPasv);
 
+    // Read response for entering passive mode (227)
     char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    // Get server response
-    int status = serverResponse(response, &code);
+    int code, status;
+    status = serverResponseControl(response, &code);
     if (status != SUCCESS) {
         fprintf(stderr, "ERROR: Server response failed\n");
         return ERROR_SERVER_RESPONSE_FAILED;
@@ -554,11 +573,20 @@ int enterPassiveMode(char* ip, int* port) {
     printf("Server: %s", response);
 
     // Check the server response code
-    if (code != SERVER_ENTERING_PASSIVE_MODE) {
-        fprintf(stderr, "ERROR: Unexpected server response code: %d\n", code);
+    int possibleCodesPassive[6] = { 
+        SERVER_ENTERING_PASSIVE_MODE,
+        SERVER_BAD_COMMAND,
+        SERVER_BAD_PARAMETERS,
+        SERVER_COMMAND_NOT_IMPLEMENTED,
+        SERVER_NOT_AVAILABLE,
+        SERVER_NOT_LOGGED_IN};
+
+    int result = processServerCode(code, possibleCodesPassive, commandPasv, response);
+    if (result != SUCCESS) {
         return ERROR_SERVER_CODE;
     }
 
+    // Parse IP and port from the server response
     int h1, h2, h3, h4, p1, p2;
     if (sscanf(response, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)",&h1, &h2, &h3, &h4, &p1, &p2) != 6) {
         fprintf(stderr, "ERROR: Failed to parse IP and port from server response\n");
@@ -567,48 +595,39 @@ int enterPassiveMode(char* ip, int* port) {
 
     sprintf(ip, "%d.%d.%d.%d", h1, h2, h3, h4); // IPv4 address
     *port = p1 * 256 + p2; // Port
-
     printf("Parsed IP: %s, Port: %d\n", ip, *port);
 
     return SUCCESS;
+
 }
 
+// RETRIEVE FILE
 int downloadFile(const char* filename, const char* localPath) {
+
+    // Build (RETR) command
     int commandLength = strlen(COMMAND_RETR) + strlen(filename) + 3;
     char commandRetr[commandLength + 1];
     sprintf(commandRetr, "%s %s\r\n", COMMAND_RETR, filename);
 
+    // Send (RETR) command
     int bytesSent = write(controlFd, commandRetr, commandLength);
     if (bytesSent != commandLength){
         fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
         return ERROR_WRITE_SOCKET_FAILED;
     }
     printf("Client: %s", commandRetr);
-
+    
+    // Open file
     localFd = fopen(localPath, "wb");
     if (!localFd) {
         fprintf(stderr, "ERROR: Cannot open local file\n");
         return ERROR_OPEN_FILE;
     }
 
+    // Read response for downloading file (150)
     char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    int status = serverResponse(response, &code);
-    if (status != SUCCESS) {
-        fprintf(stderr, "ERROR: Server response failed\n");
-        fclose(localFd);
-        return ERROR_SERVER_RESPONSE_FAILED;
-    }
-
-    printf("Server: %s", response);
-    if (code != SERVER_OPENING_DATA_CONNECTION){
-        fprintf(stderr, "ERROR: Unexpected server response code: %d\n", code);
-        fclose(localFd);
-        return ERROR_SERVER_CODE;
-    }
-
-    status = serverResponse(response, &code);
+    int code, status;
+    status = serverResponseControl(response, &code);
     if (status != SUCCESS) {
         fprintf(stderr, "ERROR: Server response failed\n");
         fclose(localFd);
@@ -616,103 +635,156 @@ int downloadFile(const char* filename, const char* localPath) {
     }
     printf("Server: %s", response);
 
-    if (code != SERVER_DATA_CONNECTION_CLOSE){
-        fprintf(stderr, "ERROR: Unexpected server response code: %d\n", code);
-        fclose(localFd);
+    // Check the server response code
+    int possibleCodesRetr1[11] = { 
+        SERVER_DATA_CONNECTION_OPEN,
+        SERVER_OPENING_DATA_CONNECTION,
+        SERVER_CANNOT_OPEN_DATA_CONNECTION,
+        SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED,
+        SERVER_REQUESTED_FILE_ACTION_ABORTED,
+        SERVER_REQUESTED_ACTION_ABORTED,
+        SERVER_FILE_UNAVAILABLE,
+        SERVER_BAD_COMMAND,
+        SERVER_BAD_PARAMETERS,
+        SERVER_NOT_LOGGED_IN,
+        SERVER_NOT_AVAILABLE};
+
+    int result = processServerCode(code, possibleCodesRetr1, commandRetr, response);
+    if (result != SUCCESS) {
         return ERROR_SERVER_CODE;
     }
 
-    fclose(localFd);
-    printf("File downloaded successfully: %s/%s\n", localPath,filename);
+    // Download file 
+    status = serverResponseData();
+    if (status != SUCCESS) {
+        fprintf(stderr, "ERROR: Failed to receive file data\n");
+        fclose(localFd);
+        return ERROR_SERVER_RESPONSE_FAILED;
+    }
+
+    // File read successfully
+    status = serverResponseControl(response, &code);
+    if (status != SUCCESS) {
+        fprintf(stderr, "ERROR: Server response failed\n");
+        fclose(localFd);
+        return ERROR_SERVER_RESPONSE_FAILED;
+    }
+    printf("Server: %s", response);
+
+    // Check the server response code
+    int possibleCodesRetr2[9] = { 
+        SERVER_DATA_CONNECTION_CLOSE,
+        SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED,
+        SERVER_REQUESTED_FILE_ACTION_ABORTED,
+        SERVER_REQUESTED_ACTION_ABORTED,
+        SERVER_FILE_UNAVAILABLE,
+        SERVER_BAD_COMMAND,
+        SERVER_BAD_PARAMETERS,
+        SERVER_NOT_LOGGED_IN,
+        SERVER_NOT_AVAILABLE
+        };
+
+    result = processServerCode(code, possibleCodesRetr2, commandRetr, response);
+    if (result != SUCCESS) {
+        return ERROR_SERVER_CODE;
+    }
+
+    if (fclose(localFd) != SUCCESS){
+        return ERROR_CLOSE_FILE;
+    }
+    printf("File downloaded successfully: %s/%s\n\n", localPath, filename);
 
     return SUCCESS;
+
 }
 
-int download(char directories[21][256], const char* filename, const char typecode){
+// DOwNLOAD FILE
+int download(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1], const char* filename, const char typecode){
 
     // Change directories
     if (cwd(directories) != SUCCESS){
-        closeConnection(controlFd);
-        return ERROR_CWD_FAILED;
+        closeSocket(controlFd);
+        return ERROR_CWD;
     }
 
     // Type code (Only Image supported)
     if (changeType(typecode)){
-        closeConnection(controlFd);
-        return ERROR_CHANGE_TYPE_FAILED;
+        closeSocket(controlFd);
+        return ERROR_CHANGE_TYPE;
     }
 
     // Get file size
     int fileSize;
     if (getFileSize(filename, &fileSize) != SUCCESS){
-        closeConnection(controlFd);
-        return ERROR_GET_SIZE_FAILED;
+        closeSocket(controlFd);
+        return ERROR_GET_FILE_SIZE;
     }
 
     // Enter passive mode
-    char ip[256];
-    int port;
+    char ip[URL_FIELD_MAX_LENGTH + 1];
+    int port = 0;
     if (enterPassiveMode(ip, &port) != SUCCESS){
-        closeConnection(controlFd);
-        return ERROR_ENTER_PASSIVE_MODE_FAILED;
+        closeSocket(controlFd);
+        return ERROR_ENTER_PASSIVE_MODE;
     }
 
     // Open data connection
-    dataFd = createConnection(ip,port);
-    if (controlFd < 0){
-        fprintf(stderr,"ERROR: Cannot establish connection to server\n");
-        closeConnection(dataFd);
-        closeConnection(controlFd);
-        return ERROR_CONNECTION_SERVER_FAILED;
+    if (openDataConnection(ip, port) != SUCCESS){
+        closeSocket(controlFd);
+        return ERROR_OPEN_DATA_CONNECTION;
     }
-    printf("Client: Connection open on ip:%s, port:%d\n\n", ip, port);
-
 
     // Download file
-    char* localPath = "../downloads";
+    char localPath[LOCAL_PATH_MAX_LENGTH];
+    sprintf(localPath, "downloads/%s", filename);
     if (downloadFile(filename,localPath) !=  SUCCESS){
-        closeConnection(dataFd);
-        closeConnection(controlFd);
-        return ERROR_DOWNLOAD_FILE_FAILED;
+        closeSocket(dataFd);
+        closeSocket(controlFd);
+        return ERROR_DOWNLOAD_FILE;
     }
 
-    return closeConnection(dataFd);
+    return SUCCESS;
+
 }
 
 // Logout
 int logout(){
 
-    // (QUIT)
-    int commandLength = strlen(COMMAND_QUIT);
-    int bytesSent = write(controlFd, COMMAND_QUIT, commandLength);
-    if (bytesSent != commandLength){
+    // Build (QUIT) command
+    int commandLength = strlen(COMMAND_QUIT) + 2; // 2 - \r + \n
+    char commandQuit[commandLength + 1];
+    sprintf(commandQuit, "%s\r\n", COMMAND_QUIT);
+
+    // Send (PASV) command 
+    int bytesSent = write(controlFd, commandQuit, commandLength);
+    if (bytesSent != commandLength) {
         fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
-        closeConnection(controlFd);
         return ERROR_WRITE_SOCKET_FAILED;
     }
-    printf("Client: %s", COMMAND_QUIT);
+    printf("Client: %s", commandQuit);
 
+    // Read response for logging out (221)
     char response[MAX_CONTROL_SIZE + 1];
-    int code;
-
-    int status = serverResponse(response, &code);
+    int code, status;
+    status = serverResponseControl(response, &code);
     if (status != SUCCESS){
         fprintf(stderr, "ERROR: Server response failed\n");
-        closeConnection(controlFd);
+        closeSocket(controlFd);
         return ERROR_SERVER_RESPONSE_FAILED;
     }
     printf("Server: %s", response);
 
+    // Check the server response code
     int possibleCodesQuit[2] = {
         SERVER_QUIT, 
-        SERVER_BAD_COMMAND,
-    };
+        SERVER_BAD_COMMAND};
 
     int result = processServerCode(code, possibleCodesQuit, COMMAND_QUIT, response);
     if (result != SUCCESS){
         return ERROR_SERVER_CODE;
     }
 
-    return closeConnection(controlFd);
+    return closeSocket(controlFd);
+
 }
 
