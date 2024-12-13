@@ -402,7 +402,7 @@ $(function() {
 <div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            </div>
 <div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;            fakeTypeCodeLen = strlen(fakeTypeCode);</div>
 <div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        </div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            <span class="keywordflow">if</span> (fakeTypeCodeLen == 1 &amp;&amp; strchr(<span class="stringliteral">&quot;iIaA&quot;</span>, fakeTypeCode[0])) {</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            <span class="keywordflow">if</span> (fakeTypeCodeLen == 1 &amp;&amp; strchr(<span class="stringliteral">&quot;iIaAdD&quot;</span>, fakeTypeCode[0])) {</div>
 <div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                parameters-&gt;<a class="code" href="structFTP__Parameters.html#a64c2acf1964dcdfa727110d53d38f363">typecode</a> = fakeTypeCode[0];</div>
 <div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;            } <span class="keywordflow">else</span> {</div>
 <div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;                fprintf(stderr, <span class="stringliteral">&quot;ERROR: Invalid typecode format\n&quot;</span>);</div>

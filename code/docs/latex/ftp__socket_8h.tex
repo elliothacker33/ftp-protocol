@@ -111,6 +111,10 @@ This graph shows which files directly or indirectly include this file\+:\nopageb
 \item 
 \#define \mbox{\hyperlink{ftp__socket_8h_aa233a540329ec11b1b6d396c7aba428c}{C\+O\+M\+M\+A\+N\+D\+\_\+\+Q\+U\+IT}}~\char`\"{}Q\+U\+IT\char`\"{}
 \item 
+\#define \mbox{\hyperlink{ftp__socket_8h_aec7f2635a80ae1a5f85fcb0d3dd8ceb8}{C\+O\+M\+M\+A\+N\+D\+\_\+\+N\+L\+ST}}~\char`\"{}N\+L\+ST\char`\"{}
+\item 
+\#define \mbox{\hyperlink{ftp__socket_8h_aa3cab39ed24b66ff44e2e2369febf594}{C\+O\+M\+M\+A\+N\+D\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+S\+I\+ZE}}~512
+\item 
 \#define \mbox{\hyperlink{ftp__socket_8h_aa90cac659d18e8ef6294c7ae337f6b58}{S\+U\+C\+C\+E\+SS}}~0
 \item 
 \#define \mbox{\hyperlink{ftp__socket_8h_acbc84c4b8a1dcf407fdafc9a126226b4}{E\+R\+R\+O\+R\+\_\+\+O\+P\+E\+N\+\_\+\+S\+O\+C\+K\+ET}}~-\/1
@@ -163,9 +167,11 @@ This graph shows which files directly or indirectly include this file\+:\nopageb
 \item 
 \#define \mbox{\hyperlink{ftp__socket_8h_a5a5bd2bfc6bf9e3a56023f1e05a6b4e4}{E\+R\+R\+O\+R\+\_\+\+D\+O\+W\+N\+L\+O\+A\+D\+\_\+\+F\+I\+LE}}~-\/25
 \item 
-\#define \mbox{\hyperlink{ftp__socket_8h_a8e9d4022de08003223ea585d629add0f}{E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+SE}}~-\/26
+\#define \mbox{\hyperlink{ftp__socket_8h_a97f7b39c050ea6c2fd9b5cd0443890df}{E\+R\+R\+O\+R\+\_\+\+L\+I\+S\+T\+\_\+\+F\+I\+L\+ES}}~-\/26
 \item 
-\#define \mbox{\hyperlink{ftp__socket_8h_a15363e7387adb890025499a0a723f4b6}{E\+R\+R\+O\+R\+\_\+\+E\+X\+C\+E\+E\+D\+E\+D\+\_\+\+M\+A\+X\+\_\+\+A\+R\+R\+A\+Y\+\_\+\+S\+I\+ZE}}~-\/27
+\#define \mbox{\hyperlink{ftp__socket_8h_a8e9d4022de08003223ea585d629add0f}{E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+SE}}~-\/27
+\item 
+\#define \mbox{\hyperlink{ftp__socket_8h_a15363e7387adb890025499a0a723f4b6}{E\+R\+R\+O\+R\+\_\+\+E\+X\+C\+E\+E\+D\+E\+D\+\_\+\+M\+A\+X\+\_\+\+A\+R\+R\+A\+Y\+\_\+\+S\+I\+ZE}}~-\/28
 \end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
@@ -214,8 +220,8 @@ int \mbox{\hyperlink{ftp__socket_8h_aded6aa5f1b12376308ce90600665c0e4}{get\+File
 \begin{DoxyCompactList}\small\item\em Get size of the file requested in U\+RL. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{ftp__socket_8h_a987f49616575f2d604c9c98c1abb69b1}{enter\+Passive\+Mode}} (char $\ast$ip, int $\ast$port)
 \begin{DoxyCompactList}\small\item\em Open passive mode for file transfer. \end{DoxyCompactList}\item 
-int \mbox{\hyperlink{ftp__socket_8h_a40147ec2e3584162e1833f03e0c7b2f4}{download\+File}} (const char $\ast$filename, const char $\ast$local\+Path, int $\ast$local\+File\+Size)
-\begin{DoxyCompactList}\small\item\em Retrieve file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8h_ad4d1832168ac0d0de410fb7761f87f0f}{download\+File}} (const char $\ast$filename, const char $\ast$local\+Path, int $\ast$local\+File\+Size, const char typecode)
+\begin{DoxyCompactList}\small\item\em Retrieve file or List files. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{ftp__socket_8h_a6bda5bfcf4af74d1dea0291f8eebb79e}{download}} (char directories\mbox{[}\mbox{\hyperlink{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}{U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+WD}}+1\mbox{]}\mbox{[}\mbox{\hyperlink{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}{U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+TH}}+1\mbox{]}, const char $\ast$filename, const char typecode)
 \begin{DoxyCompactList}\small\item\em Logic of download file. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{ftp__socket_8h_ad28b5a40354ea95099c4a194b3210451}{logout}} ()
@@ -231,7 +237,7 @@ int \mbox{\hyperlink{ftp__socket_8h_ad28b5a40354ea95099c4a194b3210451}{logout}} 
 
 
 
-Definition at line 90 of file ftp\+\_\+socket.\+h.
+Definition at line 92 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_af20810f91945bf48e3dd4db01b558cd1}\label{ftp__socket_8h_af20810f91945bf48e3dd4db01b558cd1}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!CODE\_SIZE@{CODE\_SIZE}}
@@ -252,6 +258,26 @@ Definition at line 25 of file ftp\+\_\+socket.\+h.
 
 
 Definition at line 65 of file ftp\+\_\+socket.\+h.
+
+\mbox{\Hypertarget{ftp__socket_8h_aa3cab39ed24b66ff44e2e2369febf594}\label{ftp__socket_8h_aa3cab39ed24b66ff44e2e2369febf594}} 
+\index{ftp\_socket.h@{ftp\_socket.h}!COMMAND\_DEFAULT\_SIZE@{COMMAND\_DEFAULT\_SIZE}}
+\index{COMMAND\_DEFAULT\_SIZE@{COMMAND\_DEFAULT\_SIZE}!ftp\_socket.h@{ftp\_socket.h}}
+\doxysubsubsection{\texorpdfstring{COMMAND\_DEFAULT\_SIZE}{COMMAND\_DEFAULT\_SIZE}}
+{\footnotesize\ttfamily \#define C\+O\+M\+M\+A\+N\+D\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+S\+I\+ZE~512}
+
+
+
+Definition at line 72 of file ftp\+\_\+socket.\+h.
+
+\mbox{\Hypertarget{ftp__socket_8h_aec7f2635a80ae1a5f85fcb0d3dd8ceb8}\label{ftp__socket_8h_aec7f2635a80ae1a5f85fcb0d3dd8ceb8}} 
+\index{ftp\_socket.h@{ftp\_socket.h}!COMMAND\_NLST@{COMMAND\_NLST}}
+\index{COMMAND\_NLST@{COMMAND\_NLST}!ftp\_socket.h@{ftp\_socket.h}}
+\doxysubsubsection{\texorpdfstring{COMMAND\_NLST}{COMMAND\_NLST}}
+{\footnotesize\ttfamily \#define C\+O\+M\+M\+A\+N\+D\+\_\+\+N\+L\+ST~\char`\"{}N\+L\+ST\char`\"{}}
+
+
+
+Definition at line 71 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a247b8667608616b3b12c60691f8a3053}\label{ftp__socket_8h_a247b8667608616b3b12c60691f8a3053}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!COMMAND\_PASS@{COMMAND\_PASS}}
@@ -351,7 +377,7 @@ Definition at line 22 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 100 of file ftp\+\_\+socket.\+h.
+Definition at line 102 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a44b44225604be1136eaa5d2df7f42850}\label{ftp__socket_8h_a44b44225604be1136eaa5d2df7f42850}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_CHANGE\_TYPE@{ERROR\_CHANGE\_TYPE}}
@@ -361,7 +387,7 @@ Definition at line 100 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 104 of file ftp\+\_\+socket.\+h.
+Definition at line 106 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_ad4169595ce93c2c9eb85efab798f220b}\label{ftp__socket_8h_ad4169595ce93c2c9eb85efab798f220b}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_CLOSE\_FILE@{ERROR\_CLOSE\_FILE}}
@@ -371,7 +397,7 @@ Definition at line 104 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 95 of file ftp\+\_\+socket.\+h.
+Definition at line 97 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a755b97aead61d92109c76a02cea53458}\label{ftp__socket_8h_a755b97aead61d92109c76a02cea53458}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_CLOSE\_SOCKET@{ERROR\_CLOSE\_SOCKET}}
@@ -381,7 +407,7 @@ Definition at line 95 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 77 of file ftp\+\_\+socket.\+h.
+Definition at line 79 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a1d00d4f08cecfecec4960773c30f5a39}\label{ftp__socket_8h_a1d00d4f08cecfecec4960773c30f5a39}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_CLOSE\_SOCKET\_FAILED@{ERROR\_CLOSE\_SOCKET\_FAILED}}
@@ -391,7 +417,7 @@ Definition at line 77 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 79 of file ftp\+\_\+socket.\+h.
+Definition at line 81 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_aebd09db099b4e56fac8aad83cb354c9b}\label{ftp__socket_8h_aebd09db099b4e56fac8aad83cb354c9b}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_CONNECTION\_SERVER\_FAILED@{ERROR\_CONNECTION\_SERVER\_FAILED}}
@@ -401,7 +427,7 @@ Definition at line 79 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 84 of file ftp\+\_\+socket.\+h.
+Definition at line 86 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a4556b22837386e1afbb0adf92378cbcc}\label{ftp__socket_8h_a4556b22837386e1afbb0adf92378cbcc}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_CWD@{ERROR\_CWD}}
@@ -411,7 +437,7 @@ Definition at line 84 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 103 of file ftp\+\_\+socket.\+h.
+Definition at line 105 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a5a5bd2bfc6bf9e3a56023f1e05a6b4e4}\label{ftp__socket_8h_a5a5bd2bfc6bf9e3a56023f1e05a6b4e4}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_DOWNLOAD\_FILE@{ERROR\_DOWNLOAD\_FILE}}
@@ -421,7 +447,7 @@ Definition at line 103 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 108 of file ftp\+\_\+socket.\+h.
+Definition at line 110 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a0b43286f066ef6f9cbe7a225bd7da95c}\label{ftp__socket_8h_a0b43286f066ef6f9cbe7a225bd7da95c}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_ENTER\_PASSIVE\_MODE@{ERROR\_ENTER\_PASSIVE\_MODE}}
@@ -431,17 +457,17 @@ Definition at line 108 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 106 of file ftp\+\_\+socket.\+h.
+Definition at line 108 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a15363e7387adb890025499a0a723f4b6}\label{ftp__socket_8h_a15363e7387adb890025499a0a723f4b6}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_EXCEEDED\_MAX\_ARRAY\_SIZE@{ERROR\_EXCEEDED\_MAX\_ARRAY\_SIZE}}
 \index{ERROR\_EXCEEDED\_MAX\_ARRAY\_SIZE@{ERROR\_EXCEEDED\_MAX\_ARRAY\_SIZE}!ftp\_socket.h@{ftp\_socket.h}}
 \doxysubsubsection{\texorpdfstring{ERROR\_EXCEEDED\_MAX\_ARRAY\_SIZE}{ERROR\_EXCEEDED\_MAX\_ARRAY\_SIZE}}
-{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+E\+X\+C\+E\+E\+D\+E\+D\+\_\+\+M\+A\+X\+\_\+\+A\+R\+R\+A\+Y\+\_\+\+S\+I\+ZE~-\/27}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+E\+X\+C\+E\+E\+D\+E\+D\+\_\+\+M\+A\+X\+\_\+\+A\+R\+R\+A\+Y\+\_\+\+S\+I\+ZE~-\/28}
 
 
 
-Definition at line 112 of file ftp\+\_\+socket.\+h.
+Definition at line 117 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_ab0415c830223c13bd104f3dcf3149c26}\label{ftp__socket_8h_ab0415c830223c13bd104f3dcf3149c26}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_FILE\_SIZE\_MISMATCH@{ERROR\_FILE\_SIZE\_MISMATCH}}
@@ -451,7 +477,7 @@ Definition at line 112 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 96 of file ftp\+\_\+socket.\+h.
+Definition at line 98 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_acae32fc15ef6e389ab9e00c964f9ba3f}\label{ftp__socket_8h_acae32fc15ef6e389ab9e00c964f9ba3f}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_GET\_FILE\_SIZE@{ERROR\_GET\_FILE\_SIZE}}
@@ -461,7 +487,17 @@ Definition at line 96 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 105 of file ftp\+\_\+socket.\+h.
+Definition at line 107 of file ftp\+\_\+socket.\+h.
+
+\mbox{\Hypertarget{ftp__socket_8h_a97f7b39c050ea6c2fd9b5cd0443890df}\label{ftp__socket_8h_a97f7b39c050ea6c2fd9b5cd0443890df}} 
+\index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_LIST\_FILES@{ERROR\_LIST\_FILES}}
+\index{ERROR\_LIST\_FILES@{ERROR\_LIST\_FILES}!ftp\_socket.h@{ftp\_socket.h}}
+\doxysubsubsection{\texorpdfstring{ERROR\_LIST\_FILES}{ERROR\_LIST\_FILES}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+L\+I\+S\+T\+\_\+\+F\+I\+L\+ES~-\/26}
+
+
+
+Definition at line 113 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a044c5cf00431e6e1612494867f12e0dd}\label{ftp__socket_8h_a044c5cf00431e6e1612494867f12e0dd}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_OPEN\_CONTROL\_CONNECTION@{ERROR\_OPEN\_CONTROL\_CONNECTION}}
@@ -471,7 +507,7 @@ Definition at line 105 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 99 of file ftp\+\_\+socket.\+h.
+Definition at line 101 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_aa717c9dc5f3ef9d92d1739c0372658ba}\label{ftp__socket_8h_aa717c9dc5f3ef9d92d1739c0372658ba}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_OPEN\_DATA\_CONNECTION@{ERROR\_OPEN\_DATA\_CONNECTION}}
@@ -481,7 +517,7 @@ Definition at line 99 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 107 of file ftp\+\_\+socket.\+h.
+Definition at line 109 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a18acdce401ee0e52073166b285b3c56e}\label{ftp__socket_8h_a18acdce401ee0e52073166b285b3c56e}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_OPEN\_FILE@{ERROR\_OPEN\_FILE}}
@@ -491,7 +527,7 @@ Definition at line 107 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 94 of file ftp\+\_\+socket.\+h.
+Definition at line 96 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_acbc84c4b8a1dcf407fdafc9a126226b4}\label{ftp__socket_8h_acbc84c4b8a1dcf407fdafc9a126226b4}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_OPEN\_SOCKET@{ERROR\_OPEN\_SOCKET}}
@@ -501,7 +537,7 @@ Definition at line 94 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 76 of file ftp\+\_\+socket.\+h.
+Definition at line 78 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a09fbae02559674012cac34ecfd239a3d}\label{ftp__socket_8h_a09fbae02559674012cac34ecfd239a3d}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_OPEN\_SOCKET\_FAILED@{ERROR\_OPEN\_SOCKET\_FAILED}}
@@ -511,17 +547,17 @@ Definition at line 76 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 78 of file ftp\+\_\+socket.\+h.
+Definition at line 80 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a8e9d4022de08003223ea585d629add0f}\label{ftp__socket_8h_a8e9d4022de08003223ea585d629add0f}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_PARSE@{ERROR\_PARSE}}
 \index{ERROR\_PARSE@{ERROR\_PARSE}!ftp\_socket.h@{ftp\_socket.h}}
 \doxysubsubsection{\texorpdfstring{ERROR\_PARSE}{ERROR\_PARSE}}
-{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+SE~-\/26}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+SE~-\/27}
 
 
 
-Definition at line 111 of file ftp\+\_\+socket.\+h.
+Definition at line 116 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a25679164e8f9eb26b403dc2225031ded}\label{ftp__socket_8h_a25679164e8f9eb26b403dc2225031ded}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_READ\_SOCKET\_FAILED@{ERROR\_READ\_SOCKET\_FAILED}}
@@ -531,7 +567,7 @@ Definition at line 111 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 80 of file ftp\+\_\+socket.\+h.
+Definition at line 82 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_ae96c565b01cdda72079da33179f5983f}\label{ftp__socket_8h_ae96c565b01cdda72079da33179f5983f}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_SERVER\_CLOSED\_CONNECTION@{ERROR\_SERVER\_CLOSED\_CONNECTION}}
@@ -541,7 +577,7 @@ Definition at line 80 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 85 of file ftp\+\_\+socket.\+h.
+Definition at line 87 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a1dcd6294e8b86f8d4552f5a9b2b163ed}\label{ftp__socket_8h_a1dcd6294e8b86f8d4552f5a9b2b163ed}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_SERVER\_CODE@{ERROR\_SERVER\_CODE}}
@@ -551,7 +587,7 @@ Definition at line 85 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 87 of file ftp\+\_\+socket.\+h.
+Definition at line 89 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a53116eaa261522d563fa97e9da65f361}\label{ftp__socket_8h_a53116eaa261522d563fa97e9da65f361}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_SERVER\_CODE\_EXPECTED@{ERROR\_SERVER\_CODE\_EXPECTED}}
@@ -561,7 +597,7 @@ Definition at line 87 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 88 of file ftp\+\_\+socket.\+h.
+Definition at line 90 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a13b023eb073aebd6436644da67c8a0a4}\label{ftp__socket_8h_a13b023eb073aebd6436644da67c8a0a4}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_SERVER\_CODE\_NOT\_EXPECTED@{ERROR\_SERVER\_CODE\_NOT\_EXPECTED}}
@@ -571,7 +607,7 @@ Definition at line 88 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 89 of file ftp\+\_\+socket.\+h.
+Definition at line 91 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_af8ef6b28ace9ade518a53865eea3207f}\label{ftp__socket_8h_af8ef6b28ace9ade518a53865eea3207f}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_SERVER\_RESPONSE\_FAILED@{ERROR\_SERVER\_RESPONSE\_FAILED}}
@@ -581,7 +617,7 @@ Definition at line 89 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 86 of file ftp\+\_\+socket.\+h.
+Definition at line 88 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a6ac2b700c77dd21cbfba6c7df7b3db55}\label{ftp__socket_8h_a6ac2b700c77dd21cbfba6c7df7b3db55}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_WRITE\_FILE\_FAILED@{ERROR\_WRITE\_FILE\_FAILED}}
@@ -591,7 +627,7 @@ Definition at line 86 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 93 of file ftp\+\_\+socket.\+h.
+Definition at line 95 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a7bb9f8ddd4acaf2759cc78c8a44696de}\label{ftp__socket_8h_a7bb9f8ddd4acaf2759cc78c8a44696de}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!ERROR\_WRITE\_SOCKET\_FAILED@{ERROR\_WRITE\_SOCKET\_FAILED}}
@@ -601,7 +637,7 @@ Definition at line 93 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 81 of file ftp\+\_\+socket.\+h.
+Definition at line 83 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_ae3d82b086c0b0e4ddac202078f01f120}\label{ftp__socket_8h_ae3d82b086c0b0e4ddac202078f01f120}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!IPV4@{IPV4}}
@@ -901,7 +937,7 @@ Definition at line 27 of file ftp\+\_\+socket.\+h.
 
 
 
-Definition at line 73 of file ftp\+\_\+socket.\+h.
+Definition at line 75 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a5abc37ce87f50e80e92fe273eec9c3d0}\label{ftp__socket_8h_a5abc37ce87f50e80e92fe273eec9c3d0}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!URL\_FIELD\_MAX\_LENGTH@{URL\_FIELD\_MAX\_LENGTH}}
@@ -956,7 +992,7 @@ S\+T\+A\+T\+E\+\_\+\+S\+T\+OP&\\
 \end{DoxyEnumFields}
 
 
-Definition at line 115 of file ftp\+\_\+socket.\+h.
+Definition at line 120 of file ftp\+\_\+socket.\+h.
 
 \mbox{\Hypertarget{ftp__socket_8h_a46739a58095d1688d83c3a01f23e5801}\label{ftp__socket_8h_a46739a58095d1688d83c3a01f23e5801}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!DataState@{DataState}}
@@ -976,7 +1012,7 @@ S\+T\+A\+T\+E\+\_\+\+F\+U\+L\+L\+\_\+\+F\+I\+L\+E\+\_\+\+R\+E\+AD&\\
 \end{DoxyEnumFields}
 
 
-Definition at line 123 of file ftp\+\_\+socket.\+h.
+Definition at line 128 of file ftp\+\_\+socket.\+h.
 
 
 
@@ -1080,17 +1116,17 @@ Logic of download file.
 \end{DoxyParams}
 
 
-Definition at line 725 of file ftp\+\_\+socket.\+c.
+Definition at line 743 of file ftp\+\_\+socket.\+c.
 
-\mbox{\Hypertarget{ftp__socket_8h_a40147ec2e3584162e1833f03e0c7b2f4}\label{ftp__socket_8h_a40147ec2e3584162e1833f03e0c7b2f4}} 
+\mbox{\Hypertarget{ftp__socket_8h_ad4d1832168ac0d0de410fb7761f87f0f}\label{ftp__socket_8h_ad4d1832168ac0d0de410fb7761f87f0f}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!downloadFile@{downloadFile}}
 \index{downloadFile@{downloadFile}!ftp\_socket.h@{ftp\_socket.h}}
 \doxysubsubsection{\texorpdfstring{downloadFile()}{downloadFile()}}
-{\footnotesize\ttfamily int download\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{const char $\ast$}]{local\+Path,  }\item[{int $\ast$}]{local\+File\+Size }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int download\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{const char $\ast$}]{local\+Path,  }\item[{int $\ast$}]{local\+File\+Size,  }\item[{const char}]{typecode }\end{DoxyParamCaption})}
 
 
 
-Retrieve file. 
+Retrieve file or List files. 
 
 
 \begin{DoxyParams}{Parameters}
@@ -1099,6 +1135,8 @@ Retrieve file.
 {\em local\+Path} & -\/ File path on local filesystem (save path) \\
 \hline
 {\em localfile\+Size} & -\/ File size that arrived \\
+\hline
+{\em typecode} & -\/ File transfer type \\
 \hline
 \end{DoxyParams}
 
@@ -1205,7 +1243,7 @@ Disconnect from server.
 
 
 
-Definition at line 783 of file ftp\+\_\+socket.\+c.
+Definition at line 811 of file ftp\+\_\+socket.\+c.
 
 \mbox{\Hypertarget{ftp__socket_8h_af4cff9b921a7fcbbca9680d263a65767}\label{ftp__socket_8h_af4cff9b921a7fcbbca9680d263a65767}} 
 \index{ftp\_socket.h@{ftp\_socket.h}!openControlConnection@{openControlConnection}}

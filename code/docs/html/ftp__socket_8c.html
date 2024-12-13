@@ -141,9 +141,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a987f49616575f2d604c9c98c1abb69b1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ftp__socket_8c.html#a987f49616575f2d604c9c98c1abb69b1">enterPassiveMode</a> (char *ip, int *port)</td></tr>
 <tr class="memdesc:a987f49616575f2d604c9c98c1abb69b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open passive mode for file transfer.  <a href="ftp__socket_8c.html#a987f49616575f2d604c9c98c1abb69b1">More...</a><br /></td></tr>
 <tr class="separator:a987f49616575f2d604c9c98c1abb69b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40147ec2e3584162e1833f03e0c7b2f4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ftp__socket_8c.html#a40147ec2e3584162e1833f03e0c7b2f4">downloadFile</a> (const char *filename, const char *localPath, int *localFileSize)</td></tr>
-<tr class="memdesc:a40147ec2e3584162e1833f03e0c7b2f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve file.  <a href="ftp__socket_8c.html#a40147ec2e3584162e1833f03e0c7b2f4">More...</a><br /></td></tr>
-<tr class="separator:a40147ec2e3584162e1833f03e0c7b2f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4d1832168ac0d0de410fb7761f87f0f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ftp__socket_8c.html#ad4d1832168ac0d0de410fb7761f87f0f">downloadFile</a> (const char *filename, const char *localPath, int *localFileSize, const char typecode)</td></tr>
+<tr class="memdesc:ad4d1832168ac0d0de410fb7761f87f0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve file or List files.  <a href="ftp__socket_8c.html#ad4d1832168ac0d0de410fb7761f87f0f">More...</a><br /></td></tr>
+<tr class="separator:ad4d1832168ac0d0de410fb7761f87f0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6bda5bfcf4af74d1dea0291f8eebb79e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ftp__socket_8c.html#a6bda5bfcf4af74d1dea0291f8eebb79e">download</a> (char directories[<a class="el" href="url__parser_8h.html#afcaa644bc8626af1ffe32b5b441a9c2c">URL_MAX_CWD</a>+1][<a class="el" href="url__parser_8h.html#a5abc37ce87f50e80e92fe273eec9c3d0">URL_FIELD_MAX_LENGTH</a>+1], const char *filename, const char typecode)</td></tr>
 <tr class="memdesc:a6bda5bfcf4af74d1dea0291f8eebb79e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logic of download file.  <a href="ftp__socket_8c.html#a6bda5bfcf4af74d1dea0291f8eebb79e">More...</a><br /></td></tr>
 <tr class="separator:a6bda5bfcf4af74d1dea0291f8eebb79e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -326,12 +326,12 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ftp__socket_8c_source.html#l00725">725</a> of file <a class="el" href="ftp__socket_8c_source.html">ftp_socket.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ftp__socket_8c_source.html#l00743">743</a> of file <a class="el" href="ftp__socket_8c_source.html">ftp_socket.c</a>.</p>
 
 </div>
 </div>
-<a id="a40147ec2e3584162e1833f03e0c7b2f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40147ec2e3584162e1833f03e0c7b2f4">&#9670;&nbsp;</a></span>downloadFile()</h2>
+<a id="ad4d1832168ac0d0de410fb7761f87f0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4d1832168ac0d0de410fb7761f87f0f">&#9670;&nbsp;</a></span>downloadFile()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -352,7 +352,13 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>localFileSize</em>&#160;</td>
+          <td class="paramname"><em>localFileSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char&#160;</td>
+          <td class="paramname"><em>typecode</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -362,12 +368,13 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Retrieve file. </p>
+<p>Retrieve file or List files. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">filename</td><td>- File name </td></tr>
     <tr><td class="paramname">localPath</td><td>- File path on local filesystem (save path) </td></tr>
     <tr><td class="paramname">localfileSize</td><td>- File size that arrived </td></tr>
+    <tr><td class="paramname">typecode</td><td>- File transfer type </td></tr>
   </table>
   </dd>
 </dl>
@@ -559,7 +566,7 @@ Variables</h2></td></tr>
 
 <p>Disconnect from server. </p>
 
-<p class="definition">Definition at line <a class="el" href="ftp__socket_8c_source.html#l00783">783</a> of file <a class="el" href="ftp__socket_8c_source.html">ftp_socket.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ftp__socket_8c_source.html#l00811">811</a> of file <a class="el" href="ftp__socket_8c_source.html">ftp_socket.c</a>.</p>
 
 </div>
 </div>

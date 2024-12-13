@@ -40,8 +40,8 @@ int \mbox{\hyperlink{ftp__socket_8c_aded6aa5f1b12376308ce90600665c0e4}{get\+File
 \begin{DoxyCompactList}\small\item\em Get size of the file requested in U\+RL. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{ftp__socket_8c_a987f49616575f2d604c9c98c1abb69b1}{enter\+Passive\+Mode}} (char $\ast$ip, int $\ast$port)
 \begin{DoxyCompactList}\small\item\em Open passive mode for file transfer. \end{DoxyCompactList}\item 
-int \mbox{\hyperlink{ftp__socket_8c_a40147ec2e3584162e1833f03e0c7b2f4}{download\+File}} (const char $\ast$filename, const char $\ast$local\+Path, int $\ast$local\+File\+Size)
-\begin{DoxyCompactList}\small\item\em Retrieve file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_ad4d1832168ac0d0de410fb7761f87f0f}{download\+File}} (const char $\ast$filename, const char $\ast$local\+Path, int $\ast$local\+File\+Size, const char typecode)
+\begin{DoxyCompactList}\small\item\em Retrieve file or List files. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{ftp__socket_8c_a6bda5bfcf4af74d1dea0291f8eebb79e}{download}} (char directories\mbox{[}\mbox{\hyperlink{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}{U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+WD}}+1\mbox{]}\mbox{[}\mbox{\hyperlink{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}{U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+TH}}+1\mbox{]}, const char $\ast$filename, const char typecode)
 \begin{DoxyCompactList}\small\item\em Logic of download file. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{ftp__socket_8c_ad28b5a40354ea95099c4a194b3210451}{logout}} ()
@@ -157,17 +157,17 @@ Logic of download file.
 \end{DoxyParams}
 
 
-Definition at line 725 of file ftp\+\_\+socket.\+c.
+Definition at line 743 of file ftp\+\_\+socket.\+c.
 
-\mbox{\Hypertarget{ftp__socket_8c_a40147ec2e3584162e1833f03e0c7b2f4}\label{ftp__socket_8c_a40147ec2e3584162e1833f03e0c7b2f4}} 
+\mbox{\Hypertarget{ftp__socket_8c_ad4d1832168ac0d0de410fb7761f87f0f}\label{ftp__socket_8c_ad4d1832168ac0d0de410fb7761f87f0f}} 
 \index{ftp\_socket.c@{ftp\_socket.c}!downloadFile@{downloadFile}}
 \index{downloadFile@{downloadFile}!ftp\_socket.c@{ftp\_socket.c}}
 \doxysubsubsection{\texorpdfstring{downloadFile()}{downloadFile()}}
-{\footnotesize\ttfamily int download\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{const char $\ast$}]{local\+Path,  }\item[{int $\ast$}]{local\+File\+Size }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int download\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{const char $\ast$}]{local\+Path,  }\item[{int $\ast$}]{local\+File\+Size,  }\item[{const char}]{typecode }\end{DoxyParamCaption})}
 
 
 
-Retrieve file. 
+Retrieve file or List files. 
 
 
 \begin{DoxyParams}{Parameters}
@@ -176,6 +176,8 @@ Retrieve file.
 {\em local\+Path} & -\/ File path on local filesystem (save path) \\
 \hline
 {\em localfile\+Size} & -\/ File size that arrived \\
+\hline
+{\em typecode} & -\/ File transfer type \\
 \hline
 \end{DoxyParams}
 
@@ -282,7 +284,7 @@ Disconnect from server.
 
 
 
-Definition at line 783 of file ftp\+\_\+socket.\+c.
+Definition at line 811 of file ftp\+\_\+socket.\+c.
 
 \mbox{\Hypertarget{ftp__socket_8c_af4cff9b921a7fcbbca9680d263a65767}\label{ftp__socket_8c_af4cff9b921a7fcbbca9680d263a65767}} 
 \index{ftp\_socket.c@{ftp\_socket.c}!openControlConnection@{openControlConnection}}
