@@ -815,7 +815,7 @@ int logout(){
     char commandQuit[commandLength + 1];
     sprintf(commandQuit, "%s\r\n", COMMAND_QUIT);
 
-    // Send (PASV) command 
+    // Send (QUIT) command 
     int bytesSent = write(controlFd, commandQuit, commandLength);
     if (bytesSent != commandLength) {
         fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
