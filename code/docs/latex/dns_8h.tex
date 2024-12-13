@@ -1,0 +1,108 @@
+\hypertarget{dns_8h}{}\doxysection{include/dns.h File Reference}
+\label{dns_8h}\index{include/dns.h@{include/dns.h}}
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$netdb.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/in.\+h$>$}\newline
+{\ttfamily \#include $<$arpa/inet.\+h$>$}\newline
+Include dependency graph for dns.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{dns_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{dns_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{dns_8h_a4d04a8261523c8f3473946257c12ce5b}{h\+\_\+addr}}~h\+\_\+addr\+\_\+list\mbox{[}0\mbox{]}
+\item 
+\#define \mbox{\hyperlink{dns_8h_ae3d82b086c0b0e4ddac202078f01f120}{I\+P\+V4}}~A\+F\+\_\+\+I\+N\+ET
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+char $\ast$ \mbox{\hyperlink{dns_8h_ae82eb27d187abbfa01d47064778bf7fa}{reverse\+Dns\+Lookup}} (const char $\ast$ip)
+\begin{DoxyCompactList}\small\item\em This function does a reverse D\+NS lookup. From a given IP address finds the corresponding hostname. \end{DoxyCompactList}\item 
+char $\ast$ \mbox{\hyperlink{dns_8h_a686f2465376c4cc136c9725385526f2b}{dns\+Lookup}} (const char $\ast$hostname)
+\begin{DoxyCompactList}\small\item\em This function does a D\+NS lookup. From a given hostname finds the corresponding IP address. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{dns_8h_a4d04a8261523c8f3473946257c12ce5b}\label{dns_8h_a4d04a8261523c8f3473946257c12ce5b}} 
+\index{dns.h@{dns.h}!h\_addr@{h\_addr}}
+\index{h\_addr@{h\_addr}!dns.h@{dns.h}}
+\doxysubsubsection{\texorpdfstring{h\_addr}{h\_addr}}
+{\footnotesize\ttfamily \#define h\+\_\+addr~h\+\_\+addr\+\_\+list\mbox{[}0\mbox{]}}
+
+
+
+Definition at line 13 of file dns.\+h.
+
+\mbox{\Hypertarget{dns_8h_ae3d82b086c0b0e4ddac202078f01f120}\label{dns_8h_ae3d82b086c0b0e4ddac202078f01f120}} 
+\index{dns.h@{dns.h}!IPV4@{IPV4}}
+\index{IPV4@{IPV4}!dns.h@{dns.h}}
+\doxysubsubsection{\texorpdfstring{IPV4}{IPV4}}
+{\footnotesize\ttfamily \#define I\+P\+V4~A\+F\+\_\+\+I\+N\+ET}
+
+
+
+Definition at line 14 of file dns.\+h.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{dns_8h_a686f2465376c4cc136c9725385526f2b}\label{dns_8h_a686f2465376c4cc136c9725385526f2b}} 
+\index{dns.h@{dns.h}!dnsLookup@{dnsLookup}}
+\index{dnsLookup@{dnsLookup}!dns.h@{dns.h}}
+\doxysubsubsection{\texorpdfstring{dnsLookup()}{dnsLookup()}}
+{\footnotesize\ttfamily char$\ast$ dns\+Lookup (\begin{DoxyParamCaption}\item[{const char $\ast$}]{hostname }\end{DoxyParamCaption})}
+
+
+
+This function does a D\+NS lookup. From a given hostname finds the corresponding IP address. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & The hostname \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The IP address associated with the given hostname, or N\+U\+LL if the lookup fails or the hostname is invalid. 
+\end{DoxyReturn}
+
+
+Definition at line 22 of file dns.\+c.
+
+\mbox{\Hypertarget{dns_8h_ae82eb27d187abbfa01d47064778bf7fa}\label{dns_8h_ae82eb27d187abbfa01d47064778bf7fa}} 
+\index{dns.h@{dns.h}!reverseDnsLookup@{reverseDnsLookup}}
+\index{reverseDnsLookup@{reverseDnsLookup}!dns.h@{dns.h}}
+\doxysubsubsection{\texorpdfstring{reverseDnsLookup()}{reverseDnsLookup()}}
+{\footnotesize\ttfamily char$\ast$ reverse\+Dns\+Lookup (\begin{DoxyParamCaption}\item[{const char $\ast$}]{ip }\end{DoxyParamCaption})}
+
+
+
+This function does a reverse D\+NS lookup. From a given IP address finds the corresponding hostname. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ip} & The IP address \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The hostname associated with the given IP address, or N\+U\+LL if the lookup fails or the IP address is invalid. 
+\end{DoxyReturn}
+
+
+Definition at line 3 of file dns.\+c.
+

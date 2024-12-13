@@ -1,0 +1,121 @@
+\hypertarget{ftp__client_8h}{}\doxysection{include/ftp\+\_\+client.h File Reference}
+\label{ftp__client_8h}\index{include/ftp\_client.h@{include/ftp\_client.h}}
+{\ttfamily \#include \char`\"{}url\+\_\+parser.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ftp\+\_\+socket.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}dns.\+h\char`\"{}}\newline
+Include dependency graph for ftp\+\_\+client.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ftp__client_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=189pt]{ftp__client_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{ftp__client_8h_aa90cac659d18e8ef6294c7ae337f6b58}{S\+U\+C\+C\+E\+SS}}~0
+\item 
+\#define \mbox{\hyperlink{ftp__client_8h_a74ec711a343994627a6ab2b6ea65102b}{E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+A\+N\+D\+\_\+\+L\+I\+N\+E\+\_\+\+A\+R\+GS}}~-\/1
+\item 
+\#define \mbox{\hyperlink{ftp__client_8h_aaac9349324ce552f2da3cd720ec67b06}{E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+U\+RL}}~-\/2
+\item 
+\#define \mbox{\hyperlink{ftp__client_8h_a31c359f52e49acfb17e9459d3b0bc9c9}{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+I\+N\+\_\+\+F\+A\+I\+L\+ED}}~-\/3
+\item 
+\#define \mbox{\hyperlink{ftp__client_8h_a93d4bb61c93fc8ec05c8aaab73290eaf}{E\+R\+R\+O\+R\+\_\+\+D\+O\+W\+N\+L\+O\+A\+D\+\_\+\+F\+A\+I\+L\+ED}}~-\/4
+\item 
+\#define \mbox{\hyperlink{ftp__client_8h_a74ce4ea96d5fd0ac26fa75f24054ec25}{E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+O\+U\+T\+\_\+\+F\+A\+I\+L\+ED}}~-\/5
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{ftp__client_8h_a3c04138a5bfe5d72780bb7e82a18e627}{main}} (int argc, char $\ast$$\ast$argv)
+\begin{DoxyCompactList}\small\item\em This function handles the logic of a download request to a ftp server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{ftp__client_8h_a74ec711a343994627a6ab2b6ea65102b}\label{ftp__client_8h_a74ec711a343994627a6ab2b6ea65102b}} 
+\index{ftp\_client.h@{ftp\_client.h}!ERROR\_COMMAND\_LINE\_ARGS@{ERROR\_COMMAND\_LINE\_ARGS}}
+\index{ERROR\_COMMAND\_LINE\_ARGS@{ERROR\_COMMAND\_LINE\_ARGS}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{ERROR\_COMMAND\_LINE\_ARGS}{ERROR\_COMMAND\_LINE\_ARGS}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+A\+N\+D\+\_\+\+L\+I\+N\+E\+\_\+\+A\+R\+GS~-\/1}
+
+
+
+Definition at line 11 of file ftp\+\_\+client.\+h.
+
+\mbox{\Hypertarget{ftp__client_8h_a93d4bb61c93fc8ec05c8aaab73290eaf}\label{ftp__client_8h_a93d4bb61c93fc8ec05c8aaab73290eaf}} 
+\index{ftp\_client.h@{ftp\_client.h}!ERROR\_DOWNLOAD\_FAILED@{ERROR\_DOWNLOAD\_FAILED}}
+\index{ERROR\_DOWNLOAD\_FAILED@{ERROR\_DOWNLOAD\_FAILED}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{ERROR\_DOWNLOAD\_FAILED}{ERROR\_DOWNLOAD\_FAILED}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+D\+O\+W\+N\+L\+O\+A\+D\+\_\+\+F\+A\+I\+L\+ED~-\/4}
+
+
+
+Definition at line 14 of file ftp\+\_\+client.\+h.
+
+\mbox{\Hypertarget{ftp__client_8h_aaac9349324ce552f2da3cd720ec67b06}\label{ftp__client_8h_aaac9349324ce552f2da3cd720ec67b06}} 
+\index{ftp\_client.h@{ftp\_client.h}!ERROR\_INVALID\_URL@{ERROR\_INVALID\_URL}}
+\index{ERROR\_INVALID\_URL@{ERROR\_INVALID\_URL}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{ERROR\_INVALID\_URL}{ERROR\_INVALID\_URL}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+U\+RL~-\/2}
+
+
+
+Definition at line 12 of file ftp\+\_\+client.\+h.
+
+\mbox{\Hypertarget{ftp__client_8h_a31c359f52e49acfb17e9459d3b0bc9c9}\label{ftp__client_8h_a31c359f52e49acfb17e9459d3b0bc9c9}} 
+\index{ftp\_client.h@{ftp\_client.h}!ERROR\_LOGIN\_FAILED@{ERROR\_LOGIN\_FAILED}}
+\index{ERROR\_LOGIN\_FAILED@{ERROR\_LOGIN\_FAILED}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{ERROR\_LOGIN\_FAILED}{ERROR\_LOGIN\_FAILED}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+I\+N\+\_\+\+F\+A\+I\+L\+ED~-\/3}
+
+
+
+Definition at line 13 of file ftp\+\_\+client.\+h.
+
+\mbox{\Hypertarget{ftp__client_8h_a74ce4ea96d5fd0ac26fa75f24054ec25}\label{ftp__client_8h_a74ce4ea96d5fd0ac26fa75f24054ec25}} 
+\index{ftp\_client.h@{ftp\_client.h}!ERROR\_LOGOUT\_FAILED@{ERROR\_LOGOUT\_FAILED}}
+\index{ERROR\_LOGOUT\_FAILED@{ERROR\_LOGOUT\_FAILED}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{ERROR\_LOGOUT\_FAILED}{ERROR\_LOGOUT\_FAILED}}
+{\footnotesize\ttfamily \#define E\+R\+R\+O\+R\+\_\+\+L\+O\+G\+O\+U\+T\+\_\+\+F\+A\+I\+L\+ED~-\/5}
+
+
+
+Definition at line 15 of file ftp\+\_\+client.\+h.
+
+\mbox{\Hypertarget{ftp__client_8h_aa90cac659d18e8ef6294c7ae337f6b58}\label{ftp__client_8h_aa90cac659d18e8ef6294c7ae337f6b58}} 
+\index{ftp\_client.h@{ftp\_client.h}!SUCCESS@{SUCCESS}}
+\index{SUCCESS@{SUCCESS}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{SUCCESS}{SUCCESS}}
+{\footnotesize\ttfamily \#define S\+U\+C\+C\+E\+SS~0}
+
+
+
+Definition at line 10 of file ftp\+\_\+client.\+h.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ftp__client_8h_a3c04138a5bfe5d72780bb7e82a18e627}\label{ftp__client_8h_a3c04138a5bfe5d72780bb7e82a18e627}} 
+\index{ftp\_client.h@{ftp\_client.h}!main@{main}}
+\index{main@{main}!ftp\_client.h@{ftp\_client.h}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$$\ast$}]{argv }\end{DoxyParamCaption})}
+
+
+
+This function handles the logic of a download request to a ftp server. 
+
+
+
+Definition at line 3 of file ftp\+\_\+client.\+c.
+

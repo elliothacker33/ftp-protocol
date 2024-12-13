@@ -1,0 +1,93 @@
+\hypertarget{url__parser_8c}{}\doxysection{src/url\+\_\+parser.c File Reference}
+\label{url__parser_8c}\index{src/url\_parser.c@{src/url\_parser.c}}
+{\ttfamily \#include \char`\"{}url\+\_\+parser.\+h\char`\"{}}\newline
+Include dependency graph for url\+\_\+parser.\+c\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{url__parser_8c__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{url__parser_8c_a3b375c63ed288d6c8ac18aef9ef7a469}{decode\+Percent}} (char $\ast$parameter)
+\begin{DoxyCompactList}\small\item\em This function decodes percent-\/encoded characters in the given url parameter. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{url__parser_8c_abe2b7ef2444c6c012ecfef8bdf2f5e15}{ip\+And\+Host\+Checker}} (char $\ast$hostname, char $\ast$ip)
+\begin{DoxyCompactList}\small\item\em This function is used to check if ip and hostname are valid. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{url__parser_8c_ab242f0bc16e6266447fe75c1e916477f}{ftp\+Url\+Parser}} (const char $\ast$url, \mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}} $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em This function is used to parse the ftp url. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{url__parser_8c_a3b375c63ed288d6c8ac18aef9ef7a469}\label{url__parser_8c_a3b375c63ed288d6c8ac18aef9ef7a469}} 
+\index{url\_parser.c@{url\_parser.c}!decodePercent@{decodePercent}}
+\index{decodePercent@{decodePercent}!url\_parser.c@{url\_parser.c}}
+\doxysubsubsection{\texorpdfstring{decodePercent()}{decodePercent()}}
+{\footnotesize\ttfamily int decode\+Percent (\begin{DoxyParamCaption}\item[{char $\ast$}]{parameter }\end{DoxyParamCaption})}
+
+
+
+This function decodes percent-\/encoded characters in the given url parameter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em parameter} & -\/ pointer to the string to decode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+-\/1 in case of error, 0 otherwise 
+\end{DoxyReturn}
+
+
+Definition at line 3 of file url\+\_\+parser.\+c.
+
+\mbox{\Hypertarget{url__parser_8c_ab242f0bc16e6266447fe75c1e916477f}\label{url__parser_8c_ab242f0bc16e6266447fe75c1e916477f}} 
+\index{url\_parser.c@{url\_parser.c}!ftpUrlParser@{ftpUrlParser}}
+\index{ftpUrlParser@{ftpUrlParser}!url\_parser.c@{url\_parser.c}}
+\doxysubsubsection{\texorpdfstring{ftpUrlParser()}{ftpUrlParser()}}
+{\footnotesize\ttfamily int ftp\+Url\+Parser (\begin{DoxyParamCaption}\item[{const char $\ast$}]{url,  }\item[{\mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}} $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+This function is used to parse the ftp url. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em url} & -\/ pointer to the url. \\
+\hline
+{\em parameters} & -\/ pointer to the \mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}} struct where the parsed data will be stored. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+-\/1 in case of error, 0 otherwise 
+\end{DoxyReturn}
+
+
+Definition at line 53 of file url\+\_\+parser.\+c.
+
+\mbox{\Hypertarget{url__parser_8c_abe2b7ef2444c6c012ecfef8bdf2f5e15}\label{url__parser_8c_abe2b7ef2444c6c012ecfef8bdf2f5e15}} 
+\index{url\_parser.c@{url\_parser.c}!ipAndHostChecker@{ipAndHostChecker}}
+\index{ipAndHostChecker@{ipAndHostChecker}!url\_parser.c@{url\_parser.c}}
+\doxysubsubsection{\texorpdfstring{ipAndHostChecker()}{ipAndHostChecker()}}
+{\footnotesize\ttfamily int ip\+And\+Host\+Checker (\begin{DoxyParamCaption}\item[{char $\ast$}]{hostname,  }\item[{char $\ast$}]{ip }\end{DoxyParamCaption})}
+
+
+
+This function is used to check if ip and hostname are valid. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & -\/ hostname address \\
+\hline
+{\em ip} & -\/ ip address \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+-\/1 in case of error, 0 otherwise. 
+\end{DoxyReturn}
+
+
+Definition at line 23 of file url\+\_\+parser.\+c.
+

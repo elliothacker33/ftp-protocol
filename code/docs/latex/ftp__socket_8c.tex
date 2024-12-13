@@ -1,0 +1,447 @@
+\hypertarget{ftp__socket_8c}{}\doxysection{src/ftp\+\_\+socket.c File Reference}
+\label{ftp__socket_8c}\index{src/ftp\_socket.c@{src/ftp\_socket.c}}
+{\ttfamily \#include $<$fcntl.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}ftp\+\_\+socket.\+h\char`\"{}}\newline
+Include dependency graph for ftp\+\_\+socket.\+c\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ftp__socket_8c__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{ftp__socket_8c_a995a9deafcd509c3dbef8dc1b27644d8}{open\+Socket}} (const char $\ast$ip, const int port, struct sockaddr\+\_\+in $\ast$server\+\_\+addr)
+\begin{DoxyCompactList}\small\item\em This function opens a socket at the specified server address. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_ad5de5caaad9d2f0fae16ba5f5cd03315}{close\+Socket}} (int fd)
+\begin{DoxyCompactList}\small\item\em This function closes a socket. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_aec2e228d9ac762555ac8655428d7b42a}{server\+Response\+Control}} (char $\ast$response\+Control, int $\ast$code)
+\begin{DoxyCompactList}\small\item\em This function reads control responses from the server. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a58afac47cf5d08e49a7552702d1dd533}{server\+Response\+Data}} ()
+\begin{DoxyCompactList}\small\item\em This function reads data from the server. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a5ef03045de2aa68827f3f6b1aee523cc}{process\+Server\+Code}} (const int code, const int $\ast$possible\+Codes, const char $\ast$command, const char $\ast$response)
+\begin{DoxyCompactList}\small\item\em Process response code, (R\+F\+C959 codes) \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_af4cff9b921a7fcbbca9680d263a65767}{open\+Control\+Connection}} (const char $\ast$ip, const char $\ast$host, const int port)
+\begin{DoxyCompactList}\small\item\em This function opens a control connection to the server. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a0408e1d6e33b780554d38fb1477a212e}{open\+Data\+Connection}} (const char $\ast$ip, const int port)
+\begin{DoxyCompactList}\small\item\em This function opens a data connection to the server. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_ae8f280e2b97959d2ed07a1f9cf7d6ca5}{authenticate\+Credentials}} (const char $\ast$username, const char $\ast$password)
+\begin{DoxyCompactList}\small\item\em Authenticate user with username and password. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a4bffbc617a98cb2c605548f96a71cbf9}{login}} (const char $\ast$username, const char $\ast$password, const char $\ast$ip, const char $\ast$host, const int port)
+\begin{DoxyCompactList}\small\item\em Logic of connection and authentication. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_ab016579bec90e4cbfba250a55446ac9d}{cwd}} (char directories\mbox{[}\mbox{\hyperlink{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}{U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+WD}}+1\mbox{]}\mbox{[}\mbox{\hyperlink{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}{U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+TH}}+1\mbox{]})
+\begin{DoxyCompactList}\small\item\em Go to specified directory. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_aca01dbe1f4a1f1fd5b071c2229d0c40c}{change\+Type}} (const char typecode)
+\begin{DoxyCompactList}\small\item\em Set type for file transfer. \end{DoxyCompactList}\item 
+long \mbox{\hyperlink{ftp__socket_8c_a7856134abc9bb4578f6571a28e58538d}{get\+Local\+File\+Size}} (F\+I\+LE $\ast$fptr)
+\begin{DoxyCompactList}\small\item\em Get file size of local file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_aded6aa5f1b12376308ce90600665c0e4}{get\+File\+Size}} (const char $\ast$filename, int $\ast$file\+Size)
+\begin{DoxyCompactList}\small\item\em Get size of the file requested in U\+RL. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a987f49616575f2d604c9c98c1abb69b1}{enter\+Passive\+Mode}} (char $\ast$ip, int $\ast$port)
+\begin{DoxyCompactList}\small\item\em Open passive mode for file transfer. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a40147ec2e3584162e1833f03e0c7b2f4}{download\+File}} (const char $\ast$filename, const char $\ast$local\+Path, int $\ast$local\+File\+Size)
+\begin{DoxyCompactList}\small\item\em Retrieve file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_a6bda5bfcf4af74d1dea0291f8eebb79e}{download}} (char directories\mbox{[}\mbox{\hyperlink{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}{U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+WD}}+1\mbox{]}\mbox{[}\mbox{\hyperlink{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}{U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+TH}}+1\mbox{]}, const char $\ast$filename, const char typecode)
+\begin{DoxyCompactList}\small\item\em Logic of download file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{ftp__socket_8c_ad28b5a40354ea95099c4a194b3210451}{logout}} ()
+\begin{DoxyCompactList}\small\item\em Disconnect from server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{ftp__socket_8c_a19191b7a1578f08c043e1b65c0d858d9}{control\+Fd}} = -\/1
+\item 
+int \mbox{\hyperlink{ftp__socket_8c_ab9f945d843e004fbbb155b7709051470}{data\+Fd}} = -\/1
+\item 
+F\+I\+LE $\ast$ \mbox{\hyperlink{ftp__socket_8c_add152abe1b5d04b84a212868f6ed8fb4}{local\+Fd}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ftp__socket_8c_ae8f280e2b97959d2ed07a1f9cf7d6ca5}\label{ftp__socket_8c_ae8f280e2b97959d2ed07a1f9cf7d6ca5}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!authenticateCredentials@{authenticateCredentials}}
+\index{authenticateCredentials@{authenticateCredentials}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{authenticateCredentials()}{authenticateCredentials()}}
+{\footnotesize\ttfamily int authenticate\+Credentials (\begin{DoxyParamCaption}\item[{const char $\ast$}]{username,  }\item[{const char $\ast$}]{password }\end{DoxyParamCaption})}
+
+
+
+Authenticate user with username and password. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em username} & -\/ User name \\
+\hline
+{\em password} & -\/ Password \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 308 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_aca01dbe1f4a1f1fd5b071c2229d0c40c}\label{ftp__socket_8c_aca01dbe1f4a1f1fd5b071c2229d0c40c}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!changeType@{changeType}}
+\index{changeType@{changeType}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{changeType()}{changeType()}}
+{\footnotesize\ttfamily int change\+Type (\begin{DoxyParamCaption}\item[{const char}]{typecode }\end{DoxyParamCaption})}
+
+
+
+Set type for file transfer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em typecode} & -\/ File transfer type \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 464 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_ad5de5caaad9d2f0fae16ba5f5cd03315}\label{ftp__socket_8c_ad5de5caaad9d2f0fae16ba5f5cd03315}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!closeSocket@{closeSocket}}
+\index{closeSocket@{closeSocket}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{closeSocket()}{closeSocket()}}
+{\footnotesize\ttfamily int close\+Socket (\begin{DoxyParamCaption}\item[{int}]{fd }\end{DoxyParamCaption})}
+
+
+
+This function closes a socket. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & -\/ The file descriptor \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 29 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_ab016579bec90e4cbfba250a55446ac9d}\label{ftp__socket_8c_ab016579bec90e4cbfba250a55446ac9d}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!cwd@{cwd}}
+\index{cwd@{cwd}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{cwd()}{cwd()}}
+{\footnotesize\ttfamily int cwd (\begin{DoxyParamCaption}\item[{char}]{directories\mbox{[}\+U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+W\+D+1\mbox{]}\mbox{[}\+U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+T\+H+1\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Go to specified directory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em directories} & -\/ List of directories \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 415 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a6bda5bfcf4af74d1dea0291f8eebb79e}\label{ftp__socket_8c_a6bda5bfcf4af74d1dea0291f8eebb79e}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!download@{download}}
+\index{download@{download}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{download()}{download()}}
+{\footnotesize\ttfamily int download (\begin{DoxyParamCaption}\item[{char}]{directories\mbox{[}\+U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+W\+D+1\mbox{]}\mbox{[}\+U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+T\+H+1\mbox{]},  }\item[{const char $\ast$}]{filename,  }\item[{const char}]{typecode }\end{DoxyParamCaption})}
+
+
+
+Logic of download file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em directories} & -\/ List of directories \\
+\hline
+{\em filename} & -\/ File name \\
+\hline
+{\em typecode} & -\/ File transfer type \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 725 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a40147ec2e3584162e1833f03e0c7b2f4}\label{ftp__socket_8c_a40147ec2e3584162e1833f03e0c7b2f4}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!downloadFile@{downloadFile}}
+\index{downloadFile@{downloadFile}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{downloadFile()}{downloadFile()}}
+{\footnotesize\ttfamily int download\+File (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{const char $\ast$}]{local\+Path,  }\item[{int $\ast$}]{local\+File\+Size }\end{DoxyParamCaption})}
+
+
+
+Retrieve file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & -\/ File name \\
+\hline
+{\em local\+Path} & -\/ File path on local filesystem (save path) \\
+\hline
+{\em localfile\+Size} & -\/ File size that arrived \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 621 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a987f49616575f2d604c9c98c1abb69b1}\label{ftp__socket_8c_a987f49616575f2d604c9c98c1abb69b1}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!enterPassiveMode@{enterPassiveMode}}
+\index{enterPassiveMode@{enterPassiveMode}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{enterPassiveMode()}{enterPassiveMode()}}
+{\footnotesize\ttfamily int enter\+Passive\+Mode (\begin{DoxyParamCaption}\item[{char $\ast$}]{ip,  }\item[{int $\ast$}]{port }\end{DoxyParamCaption})}
+
+
+
+Open passive mode for file transfer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ip} & -\/ Ip address for file transfer (Result) \\
+\hline
+{\em port} & -\/ Port number for file transfer (Result) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 566 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_aded6aa5f1b12376308ce90600665c0e4}\label{ftp__socket_8c_aded6aa5f1b12376308ce90600665c0e4}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!getFileSize@{getFileSize}}
+\index{getFileSize@{getFileSize}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{getFileSize()}{getFileSize()}}
+{\footnotesize\ttfamily int get\+File\+Size (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{int $\ast$}]{file\+Size }\end{DoxyParamCaption})}
+
+
+
+Get size of the file requested in U\+RL. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & -\/ File name \\
+\hline
+{\em file\+Size} & -\/ File size (Result) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 523 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a7856134abc9bb4578f6571a28e58538d}\label{ftp__socket_8c_a7856134abc9bb4578f6571a28e58538d}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!getLocalFileSize@{getLocalFileSize}}
+\index{getLocalFileSize@{getLocalFileSize}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{getLocalFileSize()}{getLocalFileSize()}}
+{\footnotesize\ttfamily long get\+Local\+File\+Size (\begin{DoxyParamCaption}\item[{F\+I\+LE $\ast$}]{fptr }\end{DoxyParamCaption})}
+
+
+
+Get file size of local file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fptr} & -\/ File pointer \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 507 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a4bffbc617a98cb2c605548f96a71cbf9}\label{ftp__socket_8c_a4bffbc617a98cb2c605548f96a71cbf9}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!login@{login}}
+\index{login@{login}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{login()}{login()}}
+{\footnotesize\ttfamily int login (\begin{DoxyParamCaption}\item[{const char $\ast$}]{username,  }\item[{const char $\ast$}]{password,  }\item[{const char $\ast$}]{ip,  }\item[{const char $\ast$}]{host,  }\item[{const int}]{port }\end{DoxyParamCaption})}
+
+
+
+Logic of connection and authentication. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em username} & -\/ User name \\
+\hline
+{\em password} & -\/ Password \\
+\hline
+{\em ip} & -\/ The server IP address \\
+\hline
+{\em host} & -\/ The server host name \\
+\hline
+{\em port} & -\/ The server port \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 396 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_ad28b5a40354ea95099c4a194b3210451}\label{ftp__socket_8c_ad28b5a40354ea95099c4a194b3210451}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!logout@{logout}}
+\index{logout@{logout}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{logout()}{logout()}}
+{\footnotesize\ttfamily int logout (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Disconnect from server. 
+
+
+
+Definition at line 783 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_af4cff9b921a7fcbbca9680d263a65767}\label{ftp__socket_8c_af4cff9b921a7fcbbca9680d263a65767}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!openControlConnection@{openControlConnection}}
+\index{openControlConnection@{openControlConnection}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{openControlConnection()}{openControlConnection()}}
+{\footnotesize\ttfamily int open\+Control\+Connection (\begin{DoxyParamCaption}\item[{const char $\ast$}]{ip,  }\item[{const char $\ast$}]{host,  }\item[{const int}]{port }\end{DoxyParamCaption})}
+
+
+
+This function opens a control connection to the server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ip} & -\/ The server IP address \\
+\hline
+{\em host} & -\/ The server host name \\
+\hline
+{\em port} & -\/ The server port \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 239 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a0408e1d6e33b780554d38fb1477a212e}\label{ftp__socket_8c_a0408e1d6e33b780554d38fb1477a212e}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!openDataConnection@{openDataConnection}}
+\index{openDataConnection@{openDataConnection}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{openDataConnection()}{openDataConnection()}}
+{\footnotesize\ttfamily int open\+Data\+Connection (\begin{DoxyParamCaption}\item[{const char $\ast$}]{ip,  }\item[{const int}]{port }\end{DoxyParamCaption})}
+
+
+
+This function opens a data connection to the server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ip} & -\/ The server IP address \\
+\hline
+{\em port} & -\/ The server port \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 282 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a995a9deafcd509c3dbef8dc1b27644d8}\label{ftp__socket_8c_a995a9deafcd509c3dbef8dc1b27644d8}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!openSocket@{openSocket}}
+\index{openSocket@{openSocket}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{openSocket()}{openSocket()}}
+{\footnotesize\ttfamily int open\+Socket (\begin{DoxyParamCaption}\item[{const char $\ast$}]{ip,  }\item[{const int}]{port,  }\item[{struct sockaddr\+\_\+in $\ast$}]{server\+\_\+addr }\end{DoxyParamCaption})}
+
+
+
+This function opens a socket at the specified server address. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ip} & -\/ The server IP address \\
+\hline
+{\em port} & -\/ The server port \\
+\hline
+{\em server\+\_\+addr} & -\/ The server address \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 10 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a5ef03045de2aa68827f3f6b1aee523cc}\label{ftp__socket_8c_a5ef03045de2aa68827f3f6b1aee523cc}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!processServerCode@{processServerCode}}
+\index{processServerCode@{processServerCode}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{processServerCode()}{processServerCode()}}
+{\footnotesize\ttfamily int process\+Server\+Code (\begin{DoxyParamCaption}\item[{const int}]{code,  }\item[{const int $\ast$}]{possible\+Codes,  }\item[{const char $\ast$}]{command,  }\item[{const char $\ast$}]{response }\end{DoxyParamCaption})}
+
+
+
+Process response code, (R\+F\+C959 codes) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em code} & -\/ Server code \\
+\hline
+{\em possible\+Codes} & -\/ List of possible codes for a command \\
+\hline
+{\em command} & -\/ Command sent to server \\
+\hline
+{\em response} & -\/ Server response \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 141 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_aec2e228d9ac762555ac8655428d7b42a}\label{ftp__socket_8c_aec2e228d9ac762555ac8655428d7b42a}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!serverResponseControl@{serverResponseControl}}
+\index{serverResponseControl@{serverResponseControl}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{serverResponseControl()}{serverResponseControl()}}
+{\footnotesize\ttfamily int server\+Response\+Control (\begin{DoxyParamCaption}\item[{char $\ast$}]{response\+Control,  }\item[{int $\ast$}]{code }\end{DoxyParamCaption})}
+
+
+
+This function reads control responses from the server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em response\+Control} & -\/ The control response \\
+\hline
+{\em code} & -\/ The control response code \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 43 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_a58afac47cf5d08e49a7552702d1dd533}\label{ftp__socket_8c_a58afac47cf5d08e49a7552702d1dd533}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!serverResponseData@{serverResponseData}}
+\index{serverResponseData@{serverResponseData}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{serverResponseData()}{serverResponseData()}}
+{\footnotesize\ttfamily int server\+Response\+Data (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+This function reads data from the server. 
+
+
+
+Definition at line 113 of file ftp\+\_\+socket.\+c.
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{ftp__socket_8c_a19191b7a1578f08c043e1b65c0d858d9}\label{ftp__socket_8c_a19191b7a1578f08c043e1b65c0d858d9}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!controlFd@{controlFd}}
+\index{controlFd@{controlFd}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{controlFd}{controlFd}}
+{\footnotesize\ttfamily int control\+Fd = -\/1}
+
+
+
+Definition at line 5 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_ab9f945d843e004fbbb155b7709051470}\label{ftp__socket_8c_ab9f945d843e004fbbb155b7709051470}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!dataFd@{dataFd}}
+\index{dataFd@{dataFd}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{dataFd}{dataFd}}
+{\footnotesize\ttfamily int data\+Fd = -\/1}
+
+
+
+Definition at line 6 of file ftp\+\_\+socket.\+c.
+
+\mbox{\Hypertarget{ftp__socket_8c_add152abe1b5d04b84a212868f6ed8fb4}\label{ftp__socket_8c_add152abe1b5d04b84a212868f6ed8fb4}} 
+\index{ftp\_socket.c@{ftp\_socket.c}!localFd@{localFd}}
+\index{localFd@{localFd}!ftp\_socket.c@{ftp\_socket.c}}
+\doxysubsubsection{\texorpdfstring{localFd}{localFd}}
+{\footnotesize\ttfamily F\+I\+LE$\ast$ local\+Fd}
+
+
+
+Definition at line 7 of file ftp\+\_\+socket.\+c.
+

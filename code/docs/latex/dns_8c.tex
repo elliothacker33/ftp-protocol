@@ -1,0 +1,65 @@
+\hypertarget{dns_8c}{}\doxysection{src/dns.c File Reference}
+\label{dns_8c}\index{src/dns.c@{src/dns.c}}
+{\ttfamily \#include \char`\"{}dns.\+h\char`\"{}}\newline
+Include dependency graph for dns.\+c\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{dns_8c__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+char $\ast$ \mbox{\hyperlink{dns_8c_ae82eb27d187abbfa01d47064778bf7fa}{reverse\+Dns\+Lookup}} (const char $\ast$ip)
+\begin{DoxyCompactList}\small\item\em This function does a reverse D\+NS lookup. From a given IP address finds the corresponding hostname. \end{DoxyCompactList}\item 
+char $\ast$ \mbox{\hyperlink{dns_8c_a686f2465376c4cc136c9725385526f2b}{dns\+Lookup}} (const char $\ast$hostname)
+\begin{DoxyCompactList}\small\item\em This function does a D\+NS lookup. From a given hostname finds the corresponding IP address. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{dns_8c_a686f2465376c4cc136c9725385526f2b}\label{dns_8c_a686f2465376c4cc136c9725385526f2b}} 
+\index{dns.c@{dns.c}!dnsLookup@{dnsLookup}}
+\index{dnsLookup@{dnsLookup}!dns.c@{dns.c}}
+\doxysubsubsection{\texorpdfstring{dnsLookup()}{dnsLookup()}}
+{\footnotesize\ttfamily char$\ast$ dns\+Lookup (\begin{DoxyParamCaption}\item[{const char $\ast$}]{hostname }\end{DoxyParamCaption})}
+
+
+
+This function does a D\+NS lookup. From a given hostname finds the corresponding IP address. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & The hostname \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The IP address associated with the given hostname, or N\+U\+LL if the lookup fails or the hostname is invalid. 
+\end{DoxyReturn}
+
+
+Definition at line 22 of file dns.\+c.
+
+\mbox{\Hypertarget{dns_8c_ae82eb27d187abbfa01d47064778bf7fa}\label{dns_8c_ae82eb27d187abbfa01d47064778bf7fa}} 
+\index{dns.c@{dns.c}!reverseDnsLookup@{reverseDnsLookup}}
+\index{reverseDnsLookup@{reverseDnsLookup}!dns.c@{dns.c}}
+\doxysubsubsection{\texorpdfstring{reverseDnsLookup()}{reverseDnsLookup()}}
+{\footnotesize\ttfamily char$\ast$ reverse\+Dns\+Lookup (\begin{DoxyParamCaption}\item[{const char $\ast$}]{ip }\end{DoxyParamCaption})}
+
+
+
+This function does a reverse D\+NS lookup. From a given IP address finds the corresponding hostname. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ip} & The IP address \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The hostname associated with the given IP address, or N\+U\+LL if the lookup fails or the IP address is invalid. 
+\end{DoxyReturn}
+
+
+Definition at line 3 of file dns.\+c.
+

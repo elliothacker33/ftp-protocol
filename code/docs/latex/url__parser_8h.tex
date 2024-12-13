@@ -1,0 +1,225 @@
+\hypertarget{url__parser_8h}{}\doxysection{include/url\+\_\+parser.h File Reference}
+\label{url__parser_8h}\index{include/url\_parser.h@{include/url\_parser.h}}
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$ctype.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}dns.\+h\char`\"{}}\newline
+Include dependency graph for url\+\_\+parser.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{url__parser_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=298pt]{url__parser_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}{U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+TH}}~255
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}{U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+WD}}~20
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a4e46bf9247af31c65baec15c28b4f8f1}{F\+T\+P\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+P\+O\+RT}}~21
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a8b016322e200d5f13680b1b77224bbe1}{F\+T\+P\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+T\+Y\+P\+E\+\_\+\+C\+O\+DE}}~\char`\"{}i\char`\"{}
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_ac82851e00c49254a5e45d5732fedc5a8}{F\+T\+P\+\_\+\+P\+R\+E\+F\+I\+X\+\_\+\+S\+I\+ZE}}~6
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a4f3e1b5923513b1b5d0b134ee9f00c3d}{F\+T\+P\+\_\+\+M\+A\+X\+\_\+\+P\+O\+RT}}~65535
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a2284fd33f426e013d534f49ee0f8879d}{U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+P\+O\+R\+T\+\_\+\+L\+E\+N\+G\+TH}}~15
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a5b60528d85ef057bb70cbf51ed1c4fdc}{U\+S\+E\+R\+\_\+\+A\+N\+O\+N\+Y\+M\+O\+US}}~\char`\"{}anonymous\char`\"{}
+\item 
+\#define \mbox{\hyperlink{url__parser_8h_a333fcdc755b02794773e782e402e4ee0}{P\+A\+S\+S\+\_\+\+A\+N\+O\+N\+Y\+M\+O\+US}}~\char`\"{}up\+X\+X\+X\+X\+X\+X\+X\+XX@edu.\+fe.\+up.\+pt\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{url__parser_8h_a3b375c63ed288d6c8ac18aef9ef7a469}{decode\+Percent}} (char $\ast$parameter)
+\begin{DoxyCompactList}\small\item\em This function decodes percent-\/encoded characters in the given url parameter. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{url__parser_8h_abe2b7ef2444c6c012ecfef8bdf2f5e15}{ip\+And\+Host\+Checker}} (char $\ast$hostname, char $\ast$ip)
+\begin{DoxyCompactList}\small\item\em This function is used to check if ip and hostname are valid. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{url__parser_8h_ab242f0bc16e6266447fe75c1e916477f}{ftp\+Url\+Parser}} (const char $\ast$url, \mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}} $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em This function is used to parse the ftp url. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{url__parser_8h_a4e46bf9247af31c65baec15c28b4f8f1}\label{url__parser_8h_a4e46bf9247af31c65baec15c28b4f8f1}} 
+\index{url\_parser.h@{url\_parser.h}!FTP\_DEFAULT\_PORT@{FTP\_DEFAULT\_PORT}}
+\index{FTP\_DEFAULT\_PORT@{FTP\_DEFAULT\_PORT}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{FTP\_DEFAULT\_PORT}{FTP\_DEFAULT\_PORT}}
+{\footnotesize\ttfamily \#define F\+T\+P\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+P\+O\+RT~21}
+
+
+
+Definition at line 17 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_a8b016322e200d5f13680b1b77224bbe1}\label{url__parser_8h_a8b016322e200d5f13680b1b77224bbe1}} 
+\index{url\_parser.h@{url\_parser.h}!FTP\_DEFAULT\_TYPE\_CODE@{FTP\_DEFAULT\_TYPE\_CODE}}
+\index{FTP\_DEFAULT\_TYPE\_CODE@{FTP\_DEFAULT\_TYPE\_CODE}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{FTP\_DEFAULT\_TYPE\_CODE}{FTP\_DEFAULT\_TYPE\_CODE}}
+{\footnotesize\ttfamily \#define F\+T\+P\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+T\+Y\+P\+E\+\_\+\+C\+O\+DE~\char`\"{}i\char`\"{}}
+
+
+
+Definition at line 18 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_a4f3e1b5923513b1b5d0b134ee9f00c3d}\label{url__parser_8h_a4f3e1b5923513b1b5d0b134ee9f00c3d}} 
+\index{url\_parser.h@{url\_parser.h}!FTP\_MAX\_PORT@{FTP\_MAX\_PORT}}
+\index{FTP\_MAX\_PORT@{FTP\_MAX\_PORT}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{FTP\_MAX\_PORT}{FTP\_MAX\_PORT}}
+{\footnotesize\ttfamily \#define F\+T\+P\+\_\+\+M\+A\+X\+\_\+\+P\+O\+RT~65535}
+
+
+
+Definition at line 20 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_ac82851e00c49254a5e45d5732fedc5a8}\label{url__parser_8h_ac82851e00c49254a5e45d5732fedc5a8}} 
+\index{url\_parser.h@{url\_parser.h}!FTP\_PREFIX\_SIZE@{FTP\_PREFIX\_SIZE}}
+\index{FTP\_PREFIX\_SIZE@{FTP\_PREFIX\_SIZE}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{FTP\_PREFIX\_SIZE}{FTP\_PREFIX\_SIZE}}
+{\footnotesize\ttfamily \#define F\+T\+P\+\_\+\+P\+R\+E\+F\+I\+X\+\_\+\+S\+I\+ZE~6}
+
+
+
+Definition at line 19 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_a333fcdc755b02794773e782e402e4ee0}\label{url__parser_8h_a333fcdc755b02794773e782e402e4ee0}} 
+\index{url\_parser.h@{url\_parser.h}!PASS\_ANONYMOUS@{PASS\_ANONYMOUS}}
+\index{PASS\_ANONYMOUS@{PASS\_ANONYMOUS}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{PASS\_ANONYMOUS}{PASS\_ANONYMOUS}}
+{\footnotesize\ttfamily \#define P\+A\+S\+S\+\_\+\+A\+N\+O\+N\+Y\+M\+O\+US~\char`\"{}up\+X\+X\+X\+X\+X\+X\+X\+XX@edu.\+fe.\+up.\+pt\char`\"{}}
+
+
+
+Definition at line 25 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}\label{url__parser_8h_a5abc37ce87f50e80e92fe273eec9c3d0}} 
+\index{url\_parser.h@{url\_parser.h}!URL\_FIELD\_MAX\_LENGTH@{URL\_FIELD\_MAX\_LENGTH}}
+\index{URL\_FIELD\_MAX\_LENGTH@{URL\_FIELD\_MAX\_LENGTH}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{URL\_FIELD\_MAX\_LENGTH}{URL\_FIELD\_MAX\_LENGTH}}
+{\footnotesize\ttfamily \#define U\+R\+L\+\_\+\+F\+I\+E\+L\+D\+\_\+\+M\+A\+X\+\_\+\+L\+E\+N\+G\+TH~255}
+
+
+
+Definition at line 15 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}\label{url__parser_8h_afcaa644bc8626af1ffe32b5b441a9c2c}} 
+\index{url\_parser.h@{url\_parser.h}!URL\_MAX\_CWD@{URL\_MAX\_CWD}}
+\index{URL\_MAX\_CWD@{URL\_MAX\_CWD}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{URL\_MAX\_CWD}{URL\_MAX\_CWD}}
+{\footnotesize\ttfamily \#define U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+C\+WD~20}
+
+
+
+Definition at line 16 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_a2284fd33f426e013d534f49ee0f8879d}\label{url__parser_8h_a2284fd33f426e013d534f49ee0f8879d}} 
+\index{url\_parser.h@{url\_parser.h}!URL\_MAX\_PORT\_LENGTH@{URL\_MAX\_PORT\_LENGTH}}
+\index{URL\_MAX\_PORT\_LENGTH@{URL\_MAX\_PORT\_LENGTH}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{URL\_MAX\_PORT\_LENGTH}{URL\_MAX\_PORT\_LENGTH}}
+{\footnotesize\ttfamily \#define U\+R\+L\+\_\+\+M\+A\+X\+\_\+\+P\+O\+R\+T\+\_\+\+L\+E\+N\+G\+TH~15}
+
+
+
+Definition at line 21 of file url\+\_\+parser.\+h.
+
+\mbox{\Hypertarget{url__parser_8h_a5b60528d85ef057bb70cbf51ed1c4fdc}\label{url__parser_8h_a5b60528d85ef057bb70cbf51ed1c4fdc}} 
+\index{url\_parser.h@{url\_parser.h}!USER\_ANONYMOUS@{USER\_ANONYMOUS}}
+\index{USER\_ANONYMOUS@{USER\_ANONYMOUS}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{USER\_ANONYMOUS}{USER\_ANONYMOUS}}
+{\footnotesize\ttfamily \#define U\+S\+E\+R\+\_\+\+A\+N\+O\+N\+Y\+M\+O\+US~\char`\"{}anonymous\char`\"{}}
+
+
+
+Definition at line 24 of file url\+\_\+parser.\+h.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{url__parser_8h_a3b375c63ed288d6c8ac18aef9ef7a469}\label{url__parser_8h_a3b375c63ed288d6c8ac18aef9ef7a469}} 
+\index{url\_parser.h@{url\_parser.h}!decodePercent@{decodePercent}}
+\index{decodePercent@{decodePercent}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{decodePercent()}{decodePercent()}}
+{\footnotesize\ttfamily int decode\+Percent (\begin{DoxyParamCaption}\item[{char $\ast$}]{parameter }\end{DoxyParamCaption})}
+
+
+
+This function decodes percent-\/encoded characters in the given url parameter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em parameter} & -\/ pointer to the string to decode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+-\/1 in case of error, 0 otherwise 
+\end{DoxyReturn}
+
+
+Definition at line 3 of file url\+\_\+parser.\+c.
+
+\mbox{\Hypertarget{url__parser_8h_ab242f0bc16e6266447fe75c1e916477f}\label{url__parser_8h_ab242f0bc16e6266447fe75c1e916477f}} 
+\index{url\_parser.h@{url\_parser.h}!ftpUrlParser@{ftpUrlParser}}
+\index{ftpUrlParser@{ftpUrlParser}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{ftpUrlParser()}{ftpUrlParser()}}
+{\footnotesize\ttfamily int ftp\+Url\+Parser (\begin{DoxyParamCaption}\item[{const char $\ast$}]{url,  }\item[{\mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}} $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+This function is used to parse the ftp url. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em url} & -\/ pointer to the url. \\
+\hline
+{\em parameters} & -\/ pointer to the \mbox{\hyperlink{structFTP__Parameters}{F\+T\+P\+\_\+\+Parameters}} struct where the parsed data will be stored. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+-\/1 in case of error, 0 otherwise 
+\end{DoxyReturn}
+
+
+Definition at line 53 of file url\+\_\+parser.\+c.
+
+\mbox{\Hypertarget{url__parser_8h_abe2b7ef2444c6c012ecfef8bdf2f5e15}\label{url__parser_8h_abe2b7ef2444c6c012ecfef8bdf2f5e15}} 
+\index{url\_parser.h@{url\_parser.h}!ipAndHostChecker@{ipAndHostChecker}}
+\index{ipAndHostChecker@{ipAndHostChecker}!url\_parser.h@{url\_parser.h}}
+\doxysubsubsection{\texorpdfstring{ipAndHostChecker()}{ipAndHostChecker()}}
+{\footnotesize\ttfamily int ip\+And\+Host\+Checker (\begin{DoxyParamCaption}\item[{char $\ast$}]{hostname,  }\item[{char $\ast$}]{ip }\end{DoxyParamCaption})}
+
+
+
+This function is used to check if ip and hostname are valid. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hostname} & -\/ hostname address \\
+\hline
+{\em ip} & -\/ ip address \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+-\/1 in case of error, 0 otherwise. 
+\end{DoxyReturn}
+
+
+Definition at line 23 of file url\+\_\+parser.\+c.
+
