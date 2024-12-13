@@ -11,22 +11,17 @@ int decodePercent(char* parameter){
 
                 if (memmove(&parameter[i + 1], &parameter[i + 3], length - i - 2) == NULL){
                     fprintf(stderr,"ERROR: Memory allocation failed");
-                    return -1;
+                    return ERROR_MEMORY_ALLOCATION;
                 }
                 length -= 2; 
             }
         }
     }
-    return 0;
+    return SUCCESS;
 }
 
 int ipAndHostChecker(char* hostname, char* ip){
     
-    if (!hostname){
-        fprintf(stderr,"ERROR: No hostname specified");
-        return -1;
-    }
-
     char* dnsResult = dnsLookup(hostname);
     if (dnsResult) {
         // Ip = dnsResult
@@ -43,24 +38,23 @@ int ipAndHostChecker(char* hostname, char* ip){
 
             } else {
                 fprintf(stderr,"ERROR: Invalid host name or IP\n");
-                return -1;
+                return ERROR_INVALID_HOST_NANE;
             }
         }
+        else{
+            fprintf(stderr,"ERROR: Invalid host name or IP\n");
+            return ERROR_INVALID_HOST_NANE;
+        }
     }
-    return 0;
+    return SUCCESS;
 }
 
 int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
-    if (!url || !parameters){
-        fprintf(stderr,"ERROR: Null pointer\n");
-        return -1;
-    }
-
     // Url prefix
     if (strncmp(url,"ftp://",FTP_PREFIX_SIZE) != 0){
         fprintf(stderr,"ERROR: Invalid url prefix"); 
-        return -1;
+        return ERROR_INVALID_URL_FORMAT;
     }
     url += FTP_PREFIX_SIZE;
 
@@ -81,7 +75,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         }
         else{
             fprintf(stderr,"ERROR: Invalid url format\n");
-            return -1;
+            return ERROR_INVALID_URL_FORMAT;
         }
 
         // Case 1: ftp://username:password@... or ftp://username@... 
@@ -92,19 +86,19 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             // Prohibited chars
             if (strchr(parameters->username, '/')) {
                 fprintf(stderr, "ERROR: Username contains '/'\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
             
             // Special chars
             if (strrchr(parameters->username, '%')){
                 if (decodePercent(parameters->username) == -1){
-                    return -1;
+                    return ERROR_DECODE;
                 }
             }
         }
         else if (usernameLength > URL_FIELD_MAX_LENGTH){
             fprintf(stderr,"ERROR: Invalid username size\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         }
 
         // Password
@@ -114,19 +108,19 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             // Prohibited chars
             if (strchr(parameters->password, '/') || strchr(parameters->password, ':')) {
                 fprintf(stderr, "ERROR: Username contains ':' or '/'\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
 
             // Special chars
             if (strrchr(parameters->password, '%')){
                 if (decodePercent(parameters->password) == -1){
-                    return -1;
+                    return ERROR_DECODE;
                 }
             }
         }
         else if (passwordLength > URL_FIELD_MAX_LENGTH){
             fprintf(stderr,"ERROR: Invalid password size\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         }
 
         url = posArr + 1;
@@ -141,7 +135,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         }
         else if (anonymousUserLength > URL_FIELD_MAX_LENGTH || anonymousPasswordLength > URL_FIELD_MAX_LENGTH){
             fprintf(stderr, "ERROR: Invalid username or password size\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         }
     }
 
@@ -170,18 +164,18 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         // Special chars
         if (strrchr(parameters->hostname, '%')){
             if (decodePercent(parameters->hostname) == -1){
-                return -1;
+                return ERROR_DECODE;
             }
         }
 
         // Hostname or IP validity check
         if (ipAndHostChecker(parameters->hostname, parameters->ip) == -1){
-            return -1;
+            return ERROR_HOST_NOT_FOUND;
         }
     }
     else{
         fprintf(stderr,"ERROR: Invalid hostname size\n");
-        return -1;
+        return ERROR_FIELD_SIZE_EXCEEDED;
     }
 
     if (posColon && posColon < posSlash){
@@ -191,7 +185,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         posColon++;
         if (*posColon == portToken || (*posColon == '0' && *(posColon + 1) != portToken)){
             fprintf(stderr,"ERROR: Invalid port format\n");
-            return -1;
+            return ERROR_INVALID_URL_FORMAT;
         }
 
         char port[URL_MAX_PORT_LENGTH + 1];
@@ -205,7 +199,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
     
         if (portLenght > URL_MAX_PORT_LENGTH){
             fprintf(stderr,"ERROR: Invalid port size\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         }
 
         memcpy(port, posColon, portLenght);
@@ -213,7 +207,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
         if (strchr(port,'%')){
             if (decodePercent(port) == -1){
-                return -1;
+                return ERROR_DECODE;
             }
             portLenght = strlen(port);
         }
@@ -221,21 +215,21 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         for (int i = 0; i < portLenght; i++){
             if (!isdigit(port[i])){
                 fprintf(stderr,"ERROR: Invalid port number\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
         }
 
         parameters->port = atoi(port);
         if (parameters->port <= 0 || parameters->port > FTP_MAX_PORT){
             fprintf(stderr,"ERROR: Invalid port number\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         } 
     }
     else if (!posColon || (posColon && posColon > posSlash)){
         // Case 2: ftp://hostname/ or ftp//hostname
-        if (FTP_DEFAULT_PORT <= 0 || parameters->port > FTP_MAX_PORT){
+        if (FTP_DEFAULT_PORT <= 0 || FTP_DEFAULT_PORT > FTP_MAX_PORT){
             fprintf(stderr,"ERROR: Invalid default port size\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         }
         parameters->port = FTP_DEFAULT_PORT;
     }
@@ -262,12 +256,12 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
                 if (strchr(cwd, ';')){
                     fprintf(stderr,"ERROR: Invalid character in path\n");
-                    return -1;
+                    return ERROR_INVALID_URL_FORMAT;
                 }
 
                 if (strchr(cwd, '%')){
                     if (decodePercent(cwd) == -1){
-                        return -1;
+                        return ERROR_DECODE;
                     }
                     cwdLen = strlen(cwd);
                 }
@@ -279,7 +273,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             }
             else{
                 fprintf(stderr,"ERROR: Invalid directory size\n");
-                return -1;
+                return ERROR_FIELD_SIZE_EXCEEDED;
             }
             lastToken = token + 1;
         }
@@ -302,25 +296,25 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
             if (strchr(parameters->filename,'%')){
                 if (decodePercent(parameters->filename) == -1){
-                    return -1;
+                    return ERROR_DECODE;
                 }
             }
         }
         else if (fileLen > URL_FIELD_MAX_LENGTH){
             fprintf(stderr,"ERROR: Invalid filename size\n");
-            return -1;
+            return ERROR_FIELD_SIZE_EXCEEDED;
         }
 
         // Typecode
         if (posV){
             if (strncmp(posV + 1, "type=", 5) != 0){
                 fprintf(stderr,"ERROR: Invalid typecode format\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
             char* typeCode = posV + 6;
             if (*typeCode == '\0') {
                 fprintf(stderr, "ERROR: Typecode is missing\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
 
             int fakeTypeCodeLen = strlen(typeCode);
@@ -331,7 +325,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
 
             if (strchr(fakeTypeCode,'%')){
                 if (decodePercent(fakeTypeCode) == -1) {
-                    return -1;
+                    return ERROR_DECODE;
                 }
             }
             
@@ -341,7 +335,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                 parameters->typecode = fakeTypeCode[0];
             } else {
                 fprintf(stderr, "ERROR: Invalid typecode format\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
         }
         else {
@@ -349,7 +343,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
                 parameters->typecode = FTP_DEFAULT_TYPE_CODE[0];
             } else {
                 fprintf(stderr, "ERROR: Invalid typecode format\n");
-                return -1;
+                return ERROR_INVALID_URL_FORMAT;
             }
         }
     }

@@ -6,7 +6,7 @@
 #include "ftp_socket.h"
 #include "dns.h"
 
-// ERROR codes
+// Error codes
 #define SUCCESS 0
 #define ERROR_COMMAND_LINE_ARGS -1
 #define ERROR_INVALID_URL -2

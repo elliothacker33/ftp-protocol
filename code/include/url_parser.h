@@ -24,6 +24,17 @@
 #define USER_ANONYMOUS "anonymous"
 #define PASS_ANONYMOUS "upXXXXXXXXX@edu.fe.up.pt" // Email address or "anonymous"
 
+
+// Error codes
+#define SUCCESS 0
+#define ERROR_MEMORY_ALLOCATION -1;
+#define ERROR_INVALID_HOST_NANE -2;
+#define ERROR_INVALID_URL_FORMAT -3;
+#define ERROR_FIELD_SIZE_EXCEEDED -4;
+#define ERROR_DECODE -5;
+#define ERROR_HOST_NOT_FOUND -6;
+
+
 /**
  * @struct Parameters for a ftp connection
  */
