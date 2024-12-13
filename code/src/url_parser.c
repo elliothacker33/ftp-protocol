@@ -331,7 +331,7 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
             
             fakeTypeCodeLen = strlen(fakeTypeCode);
         
-            if (fakeTypeCodeLen == 1 && strchr("iIaA", fakeTypeCode[0])) {
+            if (fakeTypeCodeLen == 1 && strchr("iIaAdD", fakeTypeCode[0])) {
                 parameters->typecode = fakeTypeCode[0];
             } else {
                 fprintf(stderr, "ERROR: Invalid typecode format\n");

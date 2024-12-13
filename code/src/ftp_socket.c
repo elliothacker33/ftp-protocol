@@ -618,20 +618,36 @@ int enterPassiveMode(char* ip, int* port) {
 }
 
 // RETRIEVE FILE
-int downloadFile(const char* filename, const char* localPath, int* localFileSize) {
+int downloadFile(const char* filename, const char* localPath, int* localFileSize, const char typecode) {
 
-    // Build (RETR) command
-    int commandLength = strlen(COMMAND_RETR) + strlen(filename) + 3;
-    char commandRetr[commandLength + 1];
-    sprintf(commandRetr, "%s %s\r\n", COMMAND_RETR, filename);
+    char command[COMMAND_DEFAULT_SIZE];
+    int commandLength = 0;
 
-    // Send (RETR) command
-    int bytesSent = write(controlFd, commandRetr, commandLength);
-    if (bytesSent != commandLength){
-        fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
-        return ERROR_WRITE_SOCKET_FAILED;
+    if (typecode != 'd' && typecode != 'D') {
+        // Build (RETR) command
+        commandLength = strlen(COMMAND_RETR) + strlen(filename) + 3;  // +3 for space and CRLF
+        snprintf(command, commandLength + 1, "%s %s\r\n", COMMAND_RETR, filename);
+
+        // Send (RETR) command
+        int bytesSent = write(controlFd, command, commandLength);
+        if (bytesSent != commandLength) {
+            fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+            return ERROR_WRITE_SOCKET_FAILED;
+        }
+        printf("Client: %s", command);
+    } else {
+        // Build (NLST) command
+        commandLength = strlen(COMMAND_NLST) + 2;  // +2 for CRLF
+        snprintf(command, commandLength + 1, "%s\r\n", COMMAND_NLST);
+
+        // RETR (NLST) command
+        int bytesSent = write(controlFd, command, commandLength);
+        if (bytesSent != commandLength) {
+            fprintf(stderr, "ERROR: Sent %d bytes, instead of %d\n", bytesSent, commandLength);
+            return ERROR_WRITE_SOCKET_FAILED;
+        }
+        printf("Client: %s", command);
     }
-    printf("Client: %s", commandRetr);
     
     // Open file
     localFd = fopen(localPath, "wb");
@@ -652,7 +668,7 @@ int downloadFile(const char* filename, const char* localPath, int* localFileSize
     printf("Server: %s", response);
 
     // Check the server response code
-    int possibleCodesRetr1[11] = { 
+    int possibleCodes1[11] = { 
         SERVER_DATA_CONNECTION_OPEN,
         SERVER_OPENING_DATA_CONNECTION,
         SERVER_CANNOT_OPEN_DATA_CONNECTION,
@@ -665,7 +681,7 @@ int downloadFile(const char* filename, const char* localPath, int* localFileSize
         SERVER_NOT_LOGGED_IN,
         SERVER_NOT_AVAILABLE};
 
-    int result = processServerCode(code, possibleCodesRetr1, commandRetr, response);
+    int result = processServerCode(code, possibleCodes1, command, response);
     if (result != SUCCESS) {
         return ERROR_SERVER_CODE;
     }
@@ -688,7 +704,7 @@ int downloadFile(const char* filename, const char* localPath, int* localFileSize
     printf("Server: %s", response);
 
     // Check the server response code
-    int possibleCodesRetr2[9] = { 
+    int possibleCodes2[9] = { 
         SERVER_DATA_CONNECTION_CLOSE,
         SERVER_DATA_CONNECTION_CLOSED_TRANSFER_ABORTED,
         SERVER_REQUESTED_FILE_ACTION_ABORTED,
@@ -700,16 +716,18 @@ int downloadFile(const char* filename, const char* localPath, int* localFileSize
         SERVER_NOT_AVAILABLE
         };
 
-    result = processServerCode(code, possibleCodesRetr2, commandRetr, response);
+    result = processServerCode(code, possibleCodes2, command, response);
     if (result != SUCCESS) {
         return ERROR_SERVER_CODE;
     }
 
-    *localFileSize = getLocalFileSize(localFd);
-    if (*localFileSize < 0){
-        fprintf(stderr, "ERROR: Failed to get local file size\n");
-        fclose(localFd);
-        return ERROR_GET_FILE_SIZE;
+    if (typecode != 'd' && typecode != 'D'){
+        *localFileSize = getLocalFileSize(localFd);
+        if (*localFileSize < 0){
+            fprintf(stderr, "ERROR: Failed to get local file size\n");
+            fclose(localFd);
+            return ERROR_GET_FILE_SIZE;
+        }
     }
 
     if (fclose(localFd) != SUCCESS){
@@ -731,14 +749,14 @@ int download(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1], const 
     }
 
     // Type code (Only Image supported)
-    if (changeType(typecode)){
+    if (typecode != 'd' && typecode != 'D' && changeType(typecode)){
         closeSocket(controlFd);
         return ERROR_CHANGE_TYPE;
     }
 
     // Get file size
     int fileSize;
-    if (getFileSize(filename, &fileSize) != SUCCESS){
+    if (typecode != 'd' && typecode != 'D' && getFileSize(filename, &fileSize) != SUCCESS){
         closeSocket(controlFd);
         return ERROR_GET_FILE_SIZE;
     }
@@ -757,26 +775,36 @@ int download(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1], const 
         return ERROR_OPEN_DATA_CONNECTION;
     }
 
-    // Download file
-    int localFileSize;
-    char localPath[LOCAL_PATH_MAX_LENGTH];
-    sprintf(localPath, "downloads/%s", filename);
-    if (downloadFile(filename, localPath, &localFileSize) !=  SUCCESS){
-        closeSocket(dataFd);
-        closeSocket(controlFd);
-        return ERROR_DOWNLOAD_FILE;
-    }
+    if (typecode != 'd' && typecode != 'D'){
+        // Download file
+        int localFileSize;
+        char localPath[LOCAL_PATH_MAX_LENGTH];
+        sprintf(localPath, "downloads/%s", filename);
+        if (downloadFile(filename, localPath, &localFileSize, typecode) !=  SUCCESS){
+            closeSocket(dataFd);
+            closeSocket(controlFd);
+            return ERROR_DOWNLOAD_FILE;
+        }
 
-    // File size integrity check
-    if (localFileSize != fileSize){
-        fprintf(stderr, "ERROR: File size does not match\n");
-        closeSocket(controlFd);
-        return ERROR_FILE_SIZE_MISMATCH;
+        // File size integrity check
+        if (localFileSize != fileSize){
+            fprintf(stderr, "ERROR: File size does not match\n");
+            closeSocket(controlFd);
+            return ERROR_FILE_SIZE_MISMATCH;
+        }
+        printf("File size on the server matches the local file size\n\n");
     }
-    printf("File size on the server matches the local file size\n\n");
+    else{
+        // List files
+        if (downloadFile(filename, "downloads/listFileServer.txt", NULL, typecode) !=  SUCCESS){
+            closeSocket(dataFd);
+            closeSocket(controlFd);
+            return ERROR_DOWNLOAD_FILE;
+        }
+        printf("Files listed successfully on the server\n\n");
+    }
 
     return SUCCESS;
-
 }
 
 // Logout

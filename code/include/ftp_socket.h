@@ -68,6 +68,8 @@
 #define COMMAND_PASV "PASV"
 #define COMMAND_RETR "RETR"
 #define COMMAND_QUIT "QUIT"
+#define COMMAND_NLST "NLST"
+#define COMMAND_DEFAULT_SIZE 512
 
 // Error codes
 #define SUCCESS 0
@@ -107,9 +109,12 @@
 #define ERROR_OPEN_DATA_CONNECTION -24
 #define ERROR_DOWNLOAD_FILE -25
 
+// List files
+#define ERROR_LIST_FILES -26
+
 // Others
-#define ERROR_PARSE -26
-#define ERROR_EXCEEDED_MAX_ARRAY_SIZE -27
+#define ERROR_PARSE -27
+#define ERROR_EXCEEDED_MAX_ARRAY_SIZE -28
 
 // States
 typedef enum {
@@ -225,12 +230,13 @@ int getFileSize(const char* filename, int* fileSize);
 int enterPassiveMode(char* ip, int* port);
 
 /**
- * @brief Retrieve file
+ * @brief Retrieve file or List files
  * @param filename - File name
  * @param localPath - File path on local filesystem (save path)
  * @param localfileSize - File size that arrived
+ * @param typecode - File transfer type
  */
-int downloadFile(const char* filename, const char* localPath, int* localFileSize);
+int downloadFile(const char* filename, const char* localPath, int* localFileSize, const char typecode);
 
 /**
  * @brief Logic of download file
