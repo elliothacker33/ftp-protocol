@@ -5,6 +5,7 @@ SRC = src
 INCLUDE = include
 BIN = bin
 DOWNLOADS = downloads
+TESTS = tests
 
 
 SRC_FILES = $(wildcard $(SRC)/*.c)
@@ -26,7 +27,11 @@ install: $(BIN)/download
 	fi
 
 uninstall:
-	sudo rm -f /usr/local/bin/download           
+	sudo rm -f /usr/local/bin/download
+
+run_tests: $(TESTS)/download_tests.sh
+	@echo "Running tests..."
+	@bash $(TESTS)/download_tests.sh
 
 doxygen:
 	doxygen Doxyfile
