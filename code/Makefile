@@ -28,6 +28,8 @@ install: $(BIN)/download
 uninstall:
 	sudo rm -f /usr/local/bin/download           
 
+doxygen:
+	doxygen Doxyfile
 clean:
 	rm -f $(BIN)/download $(DOWNLOADS)/*
 
