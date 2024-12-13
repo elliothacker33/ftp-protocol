@@ -29,7 +29,7 @@ int openSocket(const char* ip, const int port, struct sockaddr_in* server_addr){
 int closeSocket(int fd){
 
     // Close socket
-    if (fd < 0 && close(fd) == -1){
+    if (fd >= 0 && close(fd) == -1){
         fprintf(stderr, "ERROR: Closing control socket\n");
         return ERROR_CLOSE_SOCKET_FAILED;
     }

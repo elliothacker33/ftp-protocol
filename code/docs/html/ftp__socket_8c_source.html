@@ -100,7 +100,7 @@ $(function() {
 <div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="ftp__socket_8h.html#ad5de5caaad9d2f0fae16ba5f5cd03315">   29</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="ftp__socket_8c.html#ad5de5caaad9d2f0fae16ba5f5cd03315">closeSocket</a>(<span class="keywordtype">int</span> fd){</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="comment">// Close socket</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordflow">if</span> (fd &lt; 0 &amp;&amp; close(fd) == -1){</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordflow">if</span> (fd &gt;= 0 &amp;&amp; close(fd) == -1){</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        fprintf(stderr, <span class="stringliteral">&quot;ERROR: Closing control socket\n&quot;</span>);</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="ftp__socket_8h.html#a1d00d4f08cecfecec4960773c30f5a39">ERROR_CLOSE_SOCKET_FAILED</a>;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    }</div>
