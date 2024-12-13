@@ -503,6 +503,22 @@ int changeType(const char typecode){
 
 }
 
+// GET LOCAL FILE SIZE
+long getLocalFileSize(FILE* fptr){
+
+    if ((fseek(fptr, 0, SEEK_END)) == -1) {
+        return ERROR_GET_FILE_SIZE;
+    }
+
+    long fileSize = ftell(fptr);
+    if (fileSize == -1){
+        return ERROR_GET_FILE_SIZE;
+    }
+    rewind(fptr);
+    return fileSize;
+
+}
+
 // GET SIZE OF THE REQUESTED FILE
 int getFileSize(const char* filename, int* fileSize){
 
@@ -602,7 +618,7 @@ int enterPassiveMode(char* ip, int* port) {
 }
 
 // RETRIEVE FILE
-int downloadFile(const char* filename, const char* localPath) {
+int downloadFile(const char* filename, const char* localPath, int* localFileSize) {
 
     // Build (RETR) command
     int commandLength = strlen(COMMAND_RETR) + strlen(filename) + 3;
@@ -689,10 +705,17 @@ int downloadFile(const char* filename, const char* localPath) {
         return ERROR_SERVER_CODE;
     }
 
+    *localFileSize = getLocalFileSize(localFd);
+    if (*localFileSize < 0){
+        fprintf(stderr, "ERROR: Failed to get local file size\n");
+        fclose(localFd);
+        return ERROR_GET_FILE_SIZE;
+    }
+
     if (fclose(localFd) != SUCCESS){
         return ERROR_CLOSE_FILE;
     }
-    printf("File downloaded successfully: %s\n\n", localPath, filename);
+    printf("File downloaded successfully: %s\n", localPath);
 
     return SUCCESS;
 
@@ -735,13 +758,22 @@ int download(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1], const 
     }
 
     // Download file
+    int localFileSize;
     char localPath[LOCAL_PATH_MAX_LENGTH];
     sprintf(localPath, "downloads/%s", filename);
-    if (downloadFile(filename,localPath) !=  SUCCESS){
+    if (downloadFile(filename, localPath, &localFileSize) !=  SUCCESS){
         closeSocket(dataFd);
         closeSocket(controlFd);
         return ERROR_DOWNLOAD_FILE;
     }
+
+    // File size integrity check
+    if (localFileSize != fileSize){
+        fprintf(stderr, "ERROR: File size does not match\n");
+        closeSocket(controlFd);
+        return ERROR_FILE_SIZE_MISMATCH;
+    }
+    printf("File size on the server matches the local file size\n\n");
 
     return SUCCESS;
 

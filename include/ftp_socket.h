@@ -93,22 +93,23 @@
 #define ERROR_WRITE_FILE_FAILED -14
 #define ERROR_OPEN_FILE -15
 #define ERROR_CLOSE_FILE -16
+#define ERROR_FILE_SIZE_MISMATCH -17
 
 // Login
-#define ERROR_OPEN_CONTROL_CONNECTION -15
-#define ERROR_AUTHENTICATION_FAILED -16
+#define ERROR_OPEN_CONTROL_CONNECTION -18
+#define ERROR_AUTHENTICATION_FAILED -19
 
 // Download
-#define ERROR_CWD -17
-#define ERROR_CHANGE_TYPE -18
-#define ERROR_GET_FILE_SIZE -19
-#define ERROR_ENTER_PASSIVE_MODE -20
-#define ERROR_OPEN_DATA_CONNECTION -21
-#define ERROR_DOWNLOAD_FILE -22
+#define ERROR_CWD -20
+#define ERROR_CHANGE_TYPE -21
+#define ERROR_GET_FILE_SIZE -22
+#define ERROR_ENTER_PASSIVE_MODE -23
+#define ERROR_OPEN_DATA_CONNECTION -24
+#define ERROR_DOWNLOAD_FILE -25
 
 // Others
-#define ERROR_PARSE -23
-#define ERROR_EXCEEDED_MAX_ARRAY_SIZE -24
+#define ERROR_PARSE -26
+#define ERROR_EXCEEDED_MAX_ARRAY_SIZE -27
 
 // States
 typedef enum {
@@ -204,6 +205,12 @@ int cwd(char directories[URL_MAX_CWD + 1][URL_FIELD_MAX_LENGTH + 1]);
 int changeType(const char typecode);
 
 /**
+ * @brief Get file size of local file
+ * @param fptr - File pointer
+ */
+long getLocalFileSize(FILE* fptr);
+
+/**
  * @brief Get size of the file requested in URL
  * @param filename - File name
  * @param fileSize - File size (Result)
@@ -221,8 +228,9 @@ int enterPassiveMode(char* ip, int* port);
  * @brief Retrieve file
  * @param filename - File name
  * @param localPath - File path on local filesystem (save path)
+ * @param localfileSize - File size that arrived
  */
-int downloadFile(const char* filename, const char* localPath);
+int downloadFile(const char* filename, const char* localPath, int* localFileSize);
 
 /**
  * @brief Logic of download file
