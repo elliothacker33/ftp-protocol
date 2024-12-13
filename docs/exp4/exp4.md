@@ -48,10 +48,11 @@ router(eth1) -> P1.12
 
 ### Experiência 3
 
-**1** - Ligar router (porta 6) na bridge81 e adicionar ip's do router
+**1** - Ligar router comercial ao switch na bridge81 e adicionar ip's do router
 
 **Tux83** 
 ```bash
+# (GTKterminal switch)
 # Remove bridges antigas (C)
 /interface bridge port remove [find interface =ether6] # Tux 84
 # Adicionar bridges novas (C)
@@ -60,37 +61,43 @@ router(eth1) -> P1.12
 /interface bridge print
 /interface bridge port print
 /interface bridge port print brief
-# Adicionar ip's
+
+# (Router comercial)
+# Adicionar ip's (C)
 /ip address add address=172.16.1.81/24 interface=ether1
 /ip address add address=172.16.81.254/24 interface=ether2
 ```
 
-**2** - Verificar e adicionar rotas em falta.
+**2** - Verificar e adicionar rotas (Algumas rotas podem já estar feitas da exp3) .
 
 **Tux82**
 ```bash
+route -n # Verificar
 route add -net 172.16.1.0/24 gw 172.16.81.254 # (C)
+route add -net 172.16.80.0/24 gw 172.16.81.253 # (C)
 route -n # Verificar
 ```
 
 **Tux83**
 ```bash
+route -n # Verificar
 route add -net 172.16.1.0/24 gw 172.16.80.254 # (C)
+route add -net 172.16.81.0/24 gw 172.16.80.254 #(C)
 route -n # Verificar
 ```
 
 **Tux84**
 ```bash
+route -n # Verificar
 route add -net 172.16.1.0/24 gw 172.16.81.254 # (C)
 route -n # Verificar
 ```
 
-**router (Tux83 GTKterminal)**
+**Router comercial (Tux83 GTKterminal do router comercial)**
 ```bash
 /ip route add dst-address=172.16.80.0/24 gateway=172.16.81.253 # (C)
 /ip route print # Verificar
 ```
-
 
 **3** - Ping a todas as interfaces de rede
 
@@ -102,44 +109,51 @@ route -n # Verificar
     ping 172.16.81.254 # tux3 -> router.eth2
     ping 172.16.1.81 # tux3 -> router.eth1
 ```
-**4** - Mudar redirects no tux82
+Verificar os pacotes que tux2, tux4.eth1, tux4.eth2, router.eth1 e router.eth2 recebem (**Wireshark**)
+
+**4** - Alterar configurações de redirecionamento de pacotes no tux82.
 
 **Tux82**
 ```bash
 sysctl net.ipv4.conf.eth1.accept_redirects=0
 sysctl net.ipv4.conf.all.accept_redirects=0
 ```
+**5** - Mudar rotas no tux82 de forma a que a gateway para a rede 172.16.80.0/24 seja a do router comercial e fazer ping ao tux83.
 
-**5** - Rotas tux82
 **Tux82**
 ```bash
-sudo route del -net 172.16.80.0 netmask 255.255.255.0 gw 172.16.81.253 dev eth1
-route add -net 172.16.80.0/24 gw 172.16.81.254
-```
-**6** - Ping tux83 e traceroute
-```bash
-ping 172.16.80.0 # tux82 -> tux83 (vai pelo router comercial)
-traceroute 172.16.80.0
-```
-```bash
-sudo route del -net 172.16.80.0 netmask 255.255.255.0 gw 172.16.81.254 dev eth1
-route add -net 172.16.80.0/24 gw 172.16.81.253
-traceroute 172.16.80.0
+route -n # Verificar
+route del -net 172.16.80.0/24 netmask 255.255.255.0 gw 172.16.81.253 dev eth1 # (Remover se preciso)
+route add -net 172.16.80.0/24 gw 172.16.81.254 #(C)
+route -n # Verificar
 
-sudo route del -net 172.16.80.0 netmask 255.255.255.0 gw 172.16.81.253 dev eth1
+ping 172.16.80.1 # tux82 -> tux83
+traceroute 172.16.80.1 # Verificar caminho percorrido. tux82 -> router -> tux84 -> tux83
+```
+Verificar os pacotes que tux3 recebe (**Wireshark**)
+
+**6** - Voltar ás configurações anteriores ao 5 e verificar rotas percorridas do tux82 ao tux83.
+**Tux82**
+```bash
+route -n # Verificar
+route del -net 172.16.80.0/24 netmask 255.255.255.0 gw 172.16.81.254 dev eth1 # (Remover se preciso)
+route add -net 172.16.80.0/24 gw 172.16.81.253 #(C)
+route -n # Verificar
+
+ping 172.16.80.1 # tux82 -> tux83
+traceroute 172.16.80.1 # Verificar caminho percorrido. tux82 -> tux84 -> tux83
+```
+**7** - Ativar configurações de redirecionamento de pacotes 
+```bash
 sysctl net.ipv4.conf.eth1.accept_redirects=1
 sysctl net.ipv4.conf.all.accept_redirects=1
-traceroute 172.16.80.1 # Default 10.227.20.254 
 ```
-**7** - Ping servidor ftp sem/com nat
-**tux83**
-```bash
- ping 172.16.1.10
-```
-Desativar Nat
-```bash
- /ip firewall nat disable 0
- ping 172.16.1.10
- /ip firewall nat enable 0
 
-```
+**8** - A partir do tux83 fazer ping do servidor ftp com e sem NAT.
+```bash
+ /ip firewall nat enable 0 # (C)
+ ping 172.16.1.10
+ /ip firewall nat disable 0 # (C)
+ ping 172.16.1.10
+ /ip firewall nat enable 0 # (C) Repor nat
+
