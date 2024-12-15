@@ -348,5 +348,5 @@ int ftpUrlParser(const char* url, FTP_Parameters* parameters){
         }
     }
     
-    return 0;
+    return SUCCESS;
 }
