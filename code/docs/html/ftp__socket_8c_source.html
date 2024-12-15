@@ -886,7 +886,7 @@ $(function() {
 <div class="line"><a name="l00815"></a><span class="lineno">  815</span>&#160;    <span class="keywordtype">char</span> commandQuit[commandLength + 1];</div>
 <div class="line"><a name="l00816"></a><span class="lineno">  816</span>&#160;    sprintf(commandQuit, <span class="stringliteral">&quot;%s\r\n&quot;</span>, <a class="code" href="ftp__socket_8h.html#aa233a540329ec11b1b6d396c7aba428c">COMMAND_QUIT</a>);</div>
 <div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160; </div>
-<div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;    <span class="comment">// Send (PASV) command </span></div>
+<div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;    <span class="comment">// Send (QUIT) command </span></div>
 <div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;    <span class="keywordtype">int</span> bytesSent = write(<a class="code" href="ftp__socket_8c.html#a19191b7a1578f08c043e1b65c0d858d9">controlFd</a>, commandQuit, commandLength);</div>
 <div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;    <span class="keywordflow">if</span> (bytesSent != commandLength) {</div>
 <div class="line"><a name="l00821"></a><span class="lineno">  821</span>&#160;        fprintf(stderr, <span class="stringliteral">&quot;ERROR: Sent %d bytes, instead of %d\n&quot;</span>, bytesSent, commandLength);</div>
