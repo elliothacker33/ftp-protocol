@@ -66,15 +66,3 @@ ping services.netlab.fe.up.pt
 Visto que o ping foi bem sucedido, verificamos que conseguimos usar o hostnae `services.netlab.fe.up.pt`. 
 
 Abrimos o Wireshark e capturámos os pacotes lidos do Tux3, que se encontram no anexo `exp5.pcapng`.
-
-
-
-## Questões
-
-**1** - Como se configura o serviço DNS num host?
-
-Muda-se o conteúdo do ficheiro `/etc/resolv.conf` para `nameserver <IP_do_DNS_server_que_se_pretende_usar>`
-
-**2** - Que pacotes são trocados pelo DNS e que informção é transportada? 
-
-// TBD
