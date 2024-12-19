@@ -1,4 +1,4 @@
-# Experiência 4
+# Experiência 5
 A experiência foi realizada na bancada nº8, logo o valor de Y = 8.
 
 ## Objetivo da experiêcia
